@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | ResicoQCM</title>
+  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Basic client-side guard: require JWT and admin flag. Backend remains the source of truth.
+    (function() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) { window.location.href = 'login.html'; return; }
+        // Decode token payload (unsafe but fine for UI redirection). Backend enforces real protection.
+        const payload = JSON.parse(atob(token.split('.')[1] || ''));
+        if (!payload || !payload.isAdmin) { window.location.href = 'login.html'; return; }
+      } catch (e) { window.location.href = 'login.html'; }
+    })();
+  </script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center">
+          <span class="ml-2 text-xl font-bold text-gray-900">ResicoQCM Admin</span>
+        </div>
+        <div class="space-x-3">
+          <a href="index.html" class="text-sm text-gray-600 hover:text-gray-900">Dashboard</a>
+          <a href="revision.html" class="text-sm text-gray-600 hover:text-gray-900">Revision</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+      Admin mode • Actions are protected server-side. Keep your token secure.
+    </div>
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">Admin Panel</h1>
+
+    <div id="alert" class="hidden mb-4 p-4 rounded-md"></div>
+
+    <!-- Year tabs -->
+    <div class="mb-6">
+      <div class="inline-flex rounded-md shadow-sm" role="group">
+        <button data-year="4A" class="year-tab px-4 py-2 text-sm font-medium border rounded-l-md bg-white hover:bg-gray-50">4th year</button>
+        <button data-year="5A" class="year-tab px-4 py-2 text-sm font-medium border bg-white hover:bg-gray-50">5th year</button>
+        <button data-year="6A" class="year-tab px-4 py-2 text-sm font-medium border rounded-r-md bg-white hover:bg-gray-50">6th year</button>
+      </div>
+    </div>
+
+    <!-- Modules for selected year -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Left: modules list and create -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Modules (<span id="current-year">4A</span>)</h2>
+        <div class="relative">
+          <ul id="module-list" class="divide-y"></ul>
+          <!-- Delete Module Modal -->
+          <div id="delete-module-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg max-w-sm w-full">
+              <p class="mb-4">Delete this module and all its QCMs? This cannot be undone.</p>
+              <div class="flex justify-end space-x-2">
+                <button id="cancel-delete-module" class="px-4 py-2 text-sm rounded-md border">Cancel</button>
+                <button id="confirm-delete-module" class="px-4 py-2 text-sm rounded-md bg-red-600 text-white">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 border-t pt-4">
+          <h3 class="text-sm font-medium mb-2">Add module</h3>
+          <div class="flex gap-2">
+            <input id="new-module-name" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Module name (e.g., Cardiology)" />
+            <button id="btn-add-module" class="px-3 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: QCM creation -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Add / Edit QCM</h2>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="module-select">Module</label>
+          <select id="module-select" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></select>
+        </div>
+        
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="chapter-select">Chapitre</label>
+          <div class="flex gap-2">
+            <select id="chapter-select" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></select>
+            <button id="btn-add-chapter" class="px-3 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">+</button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="question">Question</label>
+          <textarea id="question" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter the question text..."></textarea>
+        </div>
+
+        <div id="choices" class="space-y-3 mb-4"></div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="correctIndex">Correct answer</label>
+            <select id="correctIndex" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="difficulty">Difficulty</label>
+            <select id="difficulty" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+              <option value="">—</option>
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1" for="explanation">Explanation (optional)</label>
+          <textarea id="explanation" rows="2" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Why this answer is correct..."></textarea>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div>
+            <button id="addChoice" class="px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Add choice</button>
+            <button id="removeChoice" class="ml-2 px-3 py-2 text-sm rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50">Remove choice</button>
+          </div>
+          <div class="space-x-2">
+            <button id="submitQcm" class="px-4 py-2 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Save QCM</button>
+            <button id="updateQcm" class="px-4 py-2 rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 hidden">Update QCM</button>
+            <button id="cancelEdit" class="px-4 py-2 rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 hidden">Cancel</button>
+          </div>
+        </div>
+
+        <!-- QCMs list for selected module -->
+        <div class="mt-8 border-t pt-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-medium">Existing QCMs in module</h3>
+            <button id="refreshQcm" class="px-3 py-1.5 text-xs rounded-md border">Refresh</button>
+          </div>
+          <ul id="qcm-list" class="divide-y"></ul>
+        </div>
+
+        <!-- CSV import -->
+        <div class="mt-8 border-t pt-4">
+          <h3 class="text-sm font-medium mb-2">Bulk import from CSV</h3>
+          <p class="text-xs text-gray-500 mb-2">Format: question, choice1, choice2, choice3, choice4, answer_index(1-based), [difficulty], [explanation]</p>
+          <textarea id="csv-input" rows="5" class="w-full rounded-md border-gray-300"></textarea>
+          <div class="mt-2 text-right">
+            <button id="btn-import" class="px-3 py-2 rounded-md text-white bg-emerald-600 hover:bg-emerald-700">Import CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users Management Section -->
+    <div class="mt-12 border-t pt-8">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Gestion des Utilisateurs</h2>
+      
+      <!-- User Statistics Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-bold">4A</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">4ème Année</p>
+              <p class="text-2xl font-bold text-gray-900" id="count-4A">0</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-bold">5A</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">5ème Année</p>
+              <p class="text-2xl font-bold text-gray-900" id="count-5A">0</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-bold">6A</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">6ème Année</p>
+              <p class="text-2xl font-bold text-gray-900" id="count-6A">0</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex items-center">
+            <div class="flex-shrink-0">
+              <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-bold">R</span>
+              </div>
+            </div>
+            <div class="ml-4">
+              <p class="text-sm font-medium text-gray-500">Résidents</p>
+              <p class="text-2xl font-bold text-gray-900" id="count-RES">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Year Tabs -->
+      <div class="mb-6">
+        <div class="inline-flex rounded-md shadow-sm" role="group">
+          <button data-user-year="4A" class="user-year-tab px-4 py-2 text-sm font-medium border rounded-l-md bg-indigo-600 text-white hover:bg-indigo-700">4ème Année</button>
+          <button data-user-year="5A" class="user-year-tab px-4 py-2 text-sm font-medium border bg-white text-gray-700 hover:bg-gray-50">5ème Année</button>
+          <button data-user-year="6A" class="user-year-tab px-4 py-2 text-sm font-medium border bg-white text-gray-700 hover:bg-gray-50">6ème Année</button>
+          <button data-user-year="RES" class="user-year-tab px-4 py-2 text-sm font-medium border rounded-r-md bg-white text-gray-700 hover:bg-gray-50">Résidents</button>
+        </div>
+        
+        <!-- Search and Filter Controls -->
+        <div class="mt-4 flex flex-wrap gap-4 items-center">
+          <div class="flex-1 min-w-64">
+            <input type="text" id="user-search" placeholder="Rechercher par nom, email ou username..." 
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+          </div>
+          <button id="refresh-users" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+            Actualiser
+          </button>
+          <button id="add-user-open" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            Ajouter un utilisateur
+          </button>
+          <button id="export-users" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            Exporter CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- User Details Modal -->
+      <div id="user-details-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-medium text-gray-900">Détails de l'utilisateur</h3>
+            <button onclick="closeUserDetailsModal()" class="text-gray-400 hover:text-gray-600">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <div id="user-details-content" class="p-6">
+            <!-- Content will be loaded here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Add User Modal -->
+      <div id="add-user-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+          <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-medium text-gray-900">Ajouter un utilisateur</h3>
+            <button id="add-user-close" class="text-gray-400 hover:text-gray-600" aria-label="Fermer">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Nom complet</label>
+              <input id="add-name" type="text" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Ex: Marie Dupont">
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
+                <input id="add-email" type="email" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="exemple@mail.com" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <input id="add-password" type="password" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Minimum 6 caractères" required>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Niveau d'étude</label>
+                <select id="add-role" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                  <option value="4A">4ème Année</option>
+                  <option value="5A">5ème Année</option>
+                  <option value="6A">6ème Année</option>
+                  <option value="RES">Résident</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Code unique</label>
+                <div class="mt-1 flex gap-2">
+                  <input id="add-code" type="text" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Code d'abonnement unique" required>
+                  <button id="gen-code" type="button" class="px-3 py-2 rounded-md border text-gray-700 hover:bg-gray-50">Générer</button>
+                </div>
+              </div>
+            </div>
+            <div id="add-user-error" class="hidden text-sm text-red-600"></div>
+            <div class="flex justify-end gap-2 pt-2">
+              <button id="add-user-cancel" class="px-4 py-2 rounded-md border text-gray-700 hover:bg-gray-50">Annuler</button>
+              <button id="add-user-submit" class="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Créer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">
+          Utilisateurs - <span id="current-user-year">4ème Année</span>
+          <span class="ml-2 text-sm text-gray-500">(<span id="filtered-count">0</span> utilisateurs)</span>
+        </h3>
+      </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Utilisateur
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Niveau
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Inscription
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Dernière Activité
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Statut
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+              <!-- Users will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="users-loading" class="hidden p-8 text-center">
+          <div class="inline-flex items-center">
+            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
+            <span class="ml-3 text-gray-600">Chargement des utilisateurs...</span>
+          </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="users-empty" class="hidden p-8 text-center text-gray-500">
+          <p>Aucun utilisateur trouvé pour cette année.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:8001/api';
+    const choicesContainer = document.getElementById('choices');
+    const correctIndexSelect = document.getElementById('correctIndex');
+    const alertBox = document.getElementById('alert');
+    const yearTabs = Array.from(document.querySelectorAll('.year-tab'));
+    const currentYearSpan = document.getElementById('current-year');
+    const moduleList = document.getElementById('module-list');
+    const moduleSelect = document.getElementById('module-select');
+    const chapterSelect = document.getElementById('chapter-select');
+    const qcmList = document.getElementById('qcm-list');
+    const updateBtn = document.getElementById('updateQcm');
+    const cancelEditBtn = document.getElementById('cancelEdit');
+    const submitBtn = document.getElementById('submitQcm');
+    let editQcmId = null;
+    let currentChapters = [];
+
+    function headers() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('No auth token found');
+        window.location.href = 'login.html';
+        return {};
+      }
+      return { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      };
+    }
+
+    function showAlert(type, message) {
+      alertBox.className = 'mb-4 p-4 rounded-md ' + (type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800');
+      alertBox.textContent = message;
+      alertBox.classList.remove('hidden');
+      setTimeout(() => alertBox.classList.add('hidden'), 4000);
+    }
+
+    function renderChoices(count) {
+      choicesContainer.innerHTML = '';
+      correctIndexSelect.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex items-center gap-3';
+        wrapper.innerHTML = `
+          <label class="w-20 text-sm text-gray-600">Choice ${i + 1}</label>
+          <input data-choice-index="${i}" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Enter choice ${i + 1}" />
+        `;
+        choicesContainer.appendChild(wrapper);
+
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `Choice ${i + 1}`;
+        correctIndexSelect.appendChild(opt);
+      }
+    }
+
+    function getChoicesValues() {
+      return Array.from(choicesContainer.querySelectorAll('input'))
+        .map(i => i.value.trim())
+        .filter(v => v.length > 0);
+    }
+
+    async function showDeleteModuleModal(moduleId) {
+      const modal = document.getElementById('delete-module-modal');
+      const confirmBtn = document.getElementById('confirm-delete-module');
+      const cancelBtn = document.getElementById('cancel-delete-module');
+      
+      const cleanup = () => {
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
+        modal.classList.add('hidden');
+      };
+
+      return new Promise((resolve) => {
+        confirmBtn.onclick = async () => {
+          try {
+            const r = await fetch(`${API_BASE}/admin/modules/${moduleId}`, {
+              method: 'DELETE',
+              headers: headers()
+            });
+            if (!r.ok) throw new Error('Failed to delete module');
+            showAlert('success', 'Module deleted');
+            await loadModules(currentYear);
+            moduleSelect.value = '';
+            qcmList.innerHTML = '';
+          } catch (e) {
+            showAlert('error', e.message);
+          }
+          cleanup();
+          resolve(true);
+        };
+        cancelBtn.onclick = () => { cleanup(); resolve(false); };
+        modal.classList.remove('hidden');
+      });
+    }
+
+    async function loadModules(level) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/modules?level=${encodeURIComponent(level)}`, { headers: headers() });
+        const rows = await res.json();
+        // list with delete button
+        moduleList.innerHTML = rows.map(r => `
+          <li class="py-2 text-sm flex justify-between items-center">
+            <span>${r.name} <span class="text-gray-400">(${r.slug})</span></span>
+            <button data-module-id="${r.id}" class="text-rose-600 hover:text-rose-800 text-xs">
+              Delete
+            </button>
+          </li>`).join('');
+        // Add click handlers for delete buttons
+        moduleList.querySelectorAll('button[data-module-id]').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showDeleteModuleModal(btn.getAttribute('data-module-id'));
+          });
+        });
+        // dropdown
+        moduleSelect.innerHTML = '<option value="">Select module...</option>' + rows.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      } catch (e) { showAlert('error', 'Failed to load modules'); }
+    }
+
+    async function loadQcms(moduleId, chapterId = null) {
+      try {
+        qcmList.innerHTML = '<li class="py-2 text-sm text-gray-500">Loading...</li>';
+        let url = `${API_BASE}/admin/qcm?moduleId=${encodeURIComponent(moduleId)}&limit=100`;
+        if (chapterId) {
+          url += `&chapterId=${encodeURIComponent(chapterId)}`;
+        }
+        
+        const r = await fetch(url, { headers: headers() });
+        const rows = await r.json();
+        if (rows.length === 0) {
+          qcmList.innerHTML = '<li class="py-2 text-sm text-gray-500">No QCMs yet.</li>';
+          return;
+        }
+        
+        // Add export button and QCM count
+        qcmList.innerHTML = `
+          <div class="flex items-center justify-between mb-4 pb-2 border-b">
+            <span class="text-sm font-medium">${rows.length} QCMs</span>
+            <button id="export-csv" class="px-3 py-1 text-xs rounded-md border border-green-600 text-green-600 hover:bg-green-50">
+              Export CSV
+            </button>
+          </div>
+          ${rows.map(q => `
+            <div class="py-3 border-b last:border-b-0">
+              <div class="flex justify-between items-start">
+                <div class="text-sm font-medium">${q.question}</div>
+                <div class="flex gap-2">
+                  <button data-edit="${q.id}" class="text-xs text-indigo-600 hover:underline">Edit</button>
+                  <button data-del="${q.id}" class="text-xs text-rose-600 hover:underline">Delete</button>
+                </div>
+              </div>
+              <div class="mt-1 text-xs text-gray-600">
+                ${q.choices.map((c, i) => 
+                  `<div class="flex items-center">
+                    <span class="inline-block w-4">${i === q.answer_index ? '✓' : '•'}</span>
+                    <span class="${i === q.answer_index ? 'font-medium text-green-700' : ''}">${c.text}</span>
+                  </div>`
+                ).join('')}
+              </div>
+              ${q.explanation ? `<div class="mt-1 text-xs text-gray-500 italic">${q.explanation}</div>` : ''}
+            </div>
+          `).join('')}`;
+        
+        // Add export handler
+        document.getElementById('export-csv')?.addEventListener('click', () => exportCsv(moduleId, rows));
+        
+        // Add edit/delete handlers
+        qcmList.querySelectorAll('[data-edit]').forEach(btn => 
+          btn.addEventListener('click', () => startEdit(btn.getAttribute('data-edit'), rows))
+        );
+        qcmList.querySelectorAll('[data-del]').forEach(btn => 
+          btn.addEventListener('click', () => deleteQcm(btn.getAttribute('data-del')))
+        );
+      } catch (e) { 
+        qcmList.innerHTML = '<li class="py-2 text-sm text-red-600">Failed to load QCMs</li>'; 
+        console.error(e);
+      }
+    }
+
+    // Add chapter modal
+    document.getElementById('btn-add-chapter').addEventListener('click', () => {
+      const moduleId = moduleSelect.value;
+      if (!moduleId) {
+        showAlert('error', 'Veuillez d\'abord sélectionner un module');
+        return;
+      }
+      
+      const chapterName = prompt('Nom du chapitre:');
+      if (!chapterName || chapterName.trim() === '') return;
+      
+      addChapter(moduleId, chapterName.trim());
+    });
+    
+    async function addChapter(moduleId, name) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/chapters`, {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ moduleId, name })
+        });
+        
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Erreur lors de l\'ajout du chapitre');
+        
+        showAlert('success', 'Chapitre ajouté avec succès');
+        await loadChapters(moduleId);
+      } catch (e) {
+        showAlert('error', e.message);
+        console.error('Erreur lors de l\'ajout du chapitre:', e);
+      }
+    }
+    
+    async function loadChapters(moduleId) {
+      try {
+        chapterSelect.innerHTML = '<option value="">Sélectionner un chapitre...</option>';
+        if (!moduleId) return;
+        
+        const res = await fetch(`${API_BASE}/admin/chapters?moduleId=${encodeURIComponent(moduleId)}`, {
+          headers: headers()
+        });
+        
+        const chapters = await res.json();
+        currentChapters = chapters;
+        
+        chapters.forEach(chapter => {
+          const option = document.createElement('option');
+          option.value = chapter.id;
+          option.textContent = chapter.name;
+          chapterSelect.appendChild(option);
+        });
+      } catch (e) {
+        showAlert('error', 'Erreur lors du chargement des chapitres');
+        console.error('Erreur lors du chargement des chapitres:', e);
+      }
+    }
+    
+    moduleSelect.addEventListener('change', async () => {
+      const mid = moduleSelect.value;
+      if (!mid) return;
+      await loadChapters(mid);
+      await loadQcms(mid);
+    });
+
+    chapterSelect.addEventListener('change', async () => {
+      const mid = moduleSelect.value;
+      const cid = chapterSelect.value;
+      if (!mid || !cid) return;
+      await loadQcms(mid, cid);
+    });
+
+    document.getElementById('refreshQcm').addEventListener('click', async () => {
+      if (moduleSelect.value) await loadQcms(moduleSelect.value);
+    });
+
+    function fillFormFromQcm(q) {
+      document.getElementById('question').value = q.question || '';
+      document.getElementById('explanation').value = q.explanation || '';
+      document.getElementById('difficulty').value = q.difficulty || '';
+      renderChoices(Math.max(q.choices?.length || 4, 2));
+      // fill choices
+      Array.from(choicesContainer.querySelectorAll('input')).forEach((inp, i) => { inp.value = q.choices?.[i]?.text || ''; });
+      // set answer index
+      if (typeof q.answer_index === 'number') correctIndexSelect.value = q.answer_index;
+    }
+
+    function enterEditMode(id, q) {
+      editQcmId = id;
+      updateBtn.classList.remove('hidden');
+      cancelEditBtn.classList.remove('hidden');
+      submitBtn.classList.add('hidden');
+      fillFormFromQcm(q);
+    }
+
+    function exitEditMode() {
+      editQcmId = null;
+      updateBtn.classList.add('hidden');
+      cancelEditBtn.classList.add('hidden');
+      submitBtn.classList.remove('hidden');
+      document.getElementById('question').value = '';
+      document.getElementById('explanation').value = '';
+      document.getElementById('difficulty').value = '';
+      renderChoices(4);
+    }
+
+    function startEdit(id, rows) {
+      const q = rows.find(r => r.id === id);
+      if (!q) return; enterEditMode(id, q);
+    }
+
+    async function deleteQcm(id) {
+      if (!confirm('Delete this QCM?')) return;
+      try {
+        const r = await fetch(`${API_BASE}/admin/qcm/${id}`, { method: 'DELETE', headers: headers() });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.message || 'Delete failed');
+        showAlert('success', 'QCM deleted');
+        if (moduleSelect.value) await loadQcms(moduleSelect.value);
+      } catch (e) { showAlert('error', e.message); }
+    }
+
+    // Year tab switching
+    let currentYear = '4A';
+    yearTabs.forEach(btn => btn.addEventListener('click', async () => {
+      currentYear = btn.getAttribute('data-year');
+      currentYearSpan.textContent = currentYear;
+      await loadModules(currentYear);
+    }));
+
+    // Add module
+    document.getElementById('btn-add-module').addEventListener('click', async () => {
+      const name = document.getElementById('new-module-name').value.trim();
+      if (!name) return showAlert('error', 'Enter module name');
+      
+      const btn = document.getElementById('btn-add-module');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      try {
+        // Vérifier si le serveur est accessible avant d'envoyer la requête
+        try {
+          const healthCheck = await fetch(`${API_BASE}/health`);
+          if (!healthCheck.ok) {
+            throw new Error('Le serveur backend n\'est pas accessible');
+          }
+        } catch (healthError) {
+          throw new Error('Le serveur backend n\'est pas accessible. Veuillez vérifier que le serveur est démarré.');
+        }
+        
+        const res = await fetch(`${API_BASE}/admin/modules`, {
+          method: 'POST', 
+          headers: headers(),
+          body: JSON.stringify({ name, level: currentYear })
+        });
+        
+        // Check if response is JSON
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await res.text();
+          console.log('Réponse non-JSON reçue:', text);
+          
+          if (res.status === 401) {
+            // Token likely expired, redirect to login
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUser');
+            window.location.href = 'login.html';
+            return;
+          }
+          throw new Error('Réponse serveur invalide');
+        }
+        
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonError) {
+          console.error('Erreur de parsing JSON:', jsonError);
+          throw new Error('Réponse JSON invalide du serveur');
+        }
+        
+        if (!res.ok) {
+          throw new Error(data.message || 'Échec de l\'ajout du module');
+        }
+        
+        document.getElementById('new-module-name').value = '';
+        showAlert('success', 'Module enregistré');
+        await loadModules(currentYear);
+      } catch (e) { 
+        console.error('Erreur de création de module:', e);
+        showAlert('error', e.message || 'Échec de l\'ajout du module. Veuillez consulter la console pour plus de détails.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    });
+
+    document.getElementById('addChoice').addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = choicesContainer.querySelectorAll('input').length;
+      renderChoices(Math.min(current + 1, 8));
+    });
+
+    document.getElementById('removeChoice').addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = choicesContainer.querySelectorAll('input').length;
+      renderChoices(Math.max(current - 1, 2));
+    });
+
+    document.getElementById('submitQcm').addEventListener('click', async () => {
+      const moduleId = moduleSelect.value;
+      if (!moduleId) { showAlert('error', 'Select a module'); return; }
+      
+      const chapterId = chapterSelect.value;
+      if (!chapterId) { showAlert('error', 'Sélectionnez un chapitre'); return; }
+      
+      const question = document.getElementById('question').value.trim();
+      const choices = getChoicesValues();
+      const answer = parseInt(correctIndexSelect.value, 10);
+      const explanation = document.getElementById('explanation').value.trim();
+      const difficulty = document.getElementById('difficulty').value.trim();
+
+      if (question.length < 5) {
+        showAlert('error', 'Question must have at least 5 characters');
+        return;
+      }
+      if (choices.length < 2) {
+        showAlert('error', 'Please provide at least 2 choices');
+        return;
+      }
+      if (isNaN(answer) || answer < 0 || answer >= choices.length) {
+        showAlert('error', 'Please select a valid correct answer');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/qcm`, {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ 
+            moduleId, 
+            chapterId,
+            question, 
+            choices, 
+            answer_index: answer, 
+            explanation, 
+            difficulty 
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Error saving QCM');
+        showAlert('success', 'QCM saved successfully');
+        document.getElementById('question').value = '';
+        renderChoices(4);
+        await loadModules(currentYear);
+        if (moduleSelect.value) {
+          await loadChapters(moduleSelect.value);
+          if (chapterSelect.value) {
+            await loadQcms(moduleSelect.value, chapterSelect.value);
+          }
+        }
+      } catch (err) {
+        showAlert('error', err.message);
+      }
+    });
+
+    updateBtn.addEventListener('click', async () => {
+      if (!editQcmId) return;
+      const moduleId = moduleSelect.value;
+      const chapterId = chapterSelect.value;
+      if (!chapterId) { showAlert('error', 'Sélectionnez un chapitre'); return; }
+      
+      const question = document.getElementById('question').value.trim();
+      const choices = getChoicesValues().map(t => ({ text: t }));
+      const answer = parseInt(correctIndexSelect.value, 10);
+      const explanation = document.getElementById('explanation').value.trim();
+      const difficulty = document.getElementById('difficulty').value.trim();
+      try {
+        const r = await fetch(`${API_BASE}/admin/qcm/${editQcmId}`, {
+          method: 'PUT', headers: headers(),
+          body: JSON.stringify({ question, choices, answer_index: answer, explanation, difficulty, chapterId })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.message || 'Update failed');
+        showAlert('success', 'QCM updated');
+        exitEditMode();
+        if (moduleId && chapterId) await loadQcms(moduleId, chapterId);
+      } catch (e) { showAlert('error', e.message); }
+    });
+
+    cancelEditBtn.addEventListener('click', exitEditMode);
+
+    document.getElementById('btn-import').addEventListener('click', async () => {
+      const moduleId = moduleSelect.value;
+      if (!moduleId) { showAlert('error', 'Select a module'); return; }
+      const csv = document.getElementById('csv-input').value.trim();
+      if (!csv) { showAlert('error', 'Paste CSV lines first'); return; }
+      try {
+        const r = await fetch(`${API_BASE}/admin/qcm/import`, {
+          method: 'POST', headers: headers(),
+          body: JSON.stringify({ moduleId, csv })
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.message || 'Import failed');
+        showAlert('success', `Imported ${data.created} QCMs`);
+        document.getElementById('csv-input').value = '';
+        if (moduleId) await loadQcms(moduleId);
+      } catch (e) { showAlert('error', e.message); }
+    });
+
+    // init with 4 choices
+    renderChoices(4);
+    // initial load for default year
+    loadModules('4A');
+
+    // ===== USERS MANAGEMENT SECTION =====
+    
+    let currentUserYear = '4A';
+    let allUsers = [];
+    let filteredUsers = [];
+    
+    const userYearTabs = Array.from(document.querySelectorAll('.user-year-tab'));
+    const currentUserYearSpan = document.getElementById('current-user-year');
+    const usersTableBody = document.getElementById('users-table-body');
+    const usersLoading = document.getElementById('users-loading');
+    const usersEmpty = document.getElementById('users-empty');
+    const userSearch = document.getElementById('user-search');
+    const filteredCountSpan = document.getElementById('filtered-count');
+    
+    // User year tab switching
+    userYearTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const year = tab.dataset.userYear;
+        switchUserYear(year);
+      });
+    });
+    
+    function switchUserYear(year) {
+      currentUserYear = year;
+      
+      // Update tab styles
+      userYearTabs.forEach(tab => {
+        if (tab.dataset.userYear === year) {
+          tab.className = 'user-year-tab px-4 py-2 text-sm font-medium border bg-indigo-600 text-white hover:bg-indigo-700';
+        } else {
+          tab.className = 'user-year-tab px-4 py-2 text-sm font-medium border bg-white text-gray-700 hover:bg-gray-50';
+        }
+      });
+      
+      // Update year display
+      const yearNames = {
+        '4A': '4ème Année',
+        '5A': '5ème Année', 
+        '6A': '6ème Année',
+        'RES': 'Résidents'
+      };
+      currentUserYearSpan.textContent = yearNames[year];
+      
+      // Load users for selected year
+      loadUsers();
+    }
+    
+    // Load users from API
+    async function loadUsers() {
+      try {
+        showUsersLoading(true);
+        
+        const response = await fetch(`${API_BASE}/admin/users?role=${currentUserYear}`, {
+          headers: headers()
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to load users');
+        }
+        
+        const data = await response.json();
+        allUsers = data.users || [];
+        
+        // Update user counts
+        updateUserCounts(data.counts || {});
+        
+        // Filter and display users
+        filterUsers();
+        
+      } catch (error) {
+        console.error('Error loading users:', error);
+        showAlert('error', 'Erreur lors du chargement des utilisateurs: ' + error.message);
+        allUsers = [];
+        renderUsers([]);
+      } finally {
+        showUsersLoading(false);
+      }
+    }
+    
+    // Update user count cards
+    function updateUserCounts(counts) {
+      document.getElementById('count-4A').textContent = counts['4A'] || 0;
+      document.getElementById('count-5A').textContent = counts['5A'] || 0;
+      document.getElementById('count-6A').textContent = counts['6A'] || 0;
+      document.getElementById('count-RES').textContent = counts['RES'] || 0;
+    }
+    
+    // Filter users based on search
+    function filterUsers() {
+      const searchTerm = userSearch.value.toLowerCase().trim();
+      
+      if (!searchTerm) {
+        filteredUsers = allUsers;
+      } else {
+        filteredUsers = allUsers.filter(user => 
+          user.username?.toLowerCase().includes(searchTerm) ||
+          user.email?.toLowerCase().includes(searchTerm) ||
+          user.firstName?.toLowerCase().includes(searchTerm) ||
+          user.lastName?.toLowerCase().includes(searchTerm) ||
+          `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      renderUsers(filteredUsers);
+    }
+    
+    // Render users table
+    function renderUsers(users) {
+      filteredCountSpan.textContent = users.length;
+      
+      if (users.length === 0) {
+        usersTableBody.innerHTML = '';
+        usersEmpty.classList.remove('hidden');
+        return;
+      }
+      
+      usersEmpty.classList.add('hidden');
+      
+      usersTableBody.innerHTML = users.map(user => {
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.username;
+        const registrationDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : 'N/A';
+        const lastActivity = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('fr-FR') : 'Jamais';
+        
+        const statusBadge = user.isActive ? 
+          '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Actif</span>' :
+          '<span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Inactif</span>';
+        
+        return `
+          <tr>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-full bg-indigo-500 flex items-center justify-center">
+                    <span class="text-white font-medium text-sm">${fullName.substring(0, 2).toUpperCase()}</span>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">${fullName}</div>
+                  <div class="text-sm text-gray-500">@${user.username}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">${user.email}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                ${user.role}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              ${registrationDate}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              ${lastActivity}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              ${statusBadge}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <button onclick="viewUserDetails('${user.id}')" class="text-indigo-600 hover:text-indigo-900 mr-3">
+                Voir
+              </button>
+              <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" class="text-${user.isActive ? 'red' : 'green'}-600 hover:text-${user.isActive ? 'red' : 'green'}-900">
+                ${user.isActive ? 'Désactiver' : 'Activer'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+    
+    // Show/hide loading state
+    function showUsersLoading(show) {
+      if (show) {
+        usersLoading.classList.remove('hidden');
+        usersEmpty.classList.add('hidden');
+      } else {
+        usersLoading.classList.add('hidden');
+      }
+    }
+    
+    // View user details
+    async function viewUserDetails(userId) {
+      try {
+        const modal = document.getElementById('user-details-modal');
+        const content = document.getElementById('user-details-content');
+        
+        // Show loading state
+        content.innerHTML = `
+          <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <span class="ml-3 text-gray-600">Chargement des détails...</span>
+          </div>
+        `;
+        modal.classList.remove('hidden');
+        
+        // Fetch user details from API
+        const response = await fetch(`${API_BASE}/admin/users/${userId}`, {
+          headers: headers()
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user details');
+        }
+        
+        const user = await response.json();
+        
+        // Render user details
+        content.innerHTML = `
+          <div class="space-y-6">
+            <!-- User Info -->
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 bg-indigo-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-xl font-bold">${(user.firstName || user.username).substring(0, 2).toUpperCase()}</span>
+              </div>
+              <div>
+                <h4 class="text-xl font-semibold text-gray-900">${user.firstName} ${user.lastName}</h4>
+                <p class="text-gray-600">@${user.username}</p>
+                <p class="text-sm text-gray-500">${user.email}</p>
+              </div>
+            </div>
+            
+            <!-- User Stats -->
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-gray-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-indigo-600">${user.stats.totalSessions}</div>
+                <div class="text-sm text-gray-600">Sessions Total</div>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-green-600">${user.stats.completedSessions}</div>
+                <div class="text-sm text-gray-600">Sessions Terminées</div>
+              </div>
+              <div class="bg-gray-50 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-blue-600">${user.stats.averageScore}%</div>
+                <div class="text-sm text-gray-600">Score Moyen</div>
+              </div>
+            </div>
+            
+            <!-- User Details -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Niveau d'étude</label>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  ${user.role}
+                </span>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Statut</label>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                  ${user.isActive ? 'Actif' : 'Inactif'}
+                </span>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Date d'inscription</label>
+                <p class="text-sm text-gray-900">${new Date(user.createdAt).toLocaleDateString('fr-FR')}</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Administrateur</label>
+                <p class="text-sm text-gray-900">${user.isAdmin ? 'Oui' : 'Non'}</p>
+              </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div>
+              <h5 class="text-lg font-medium text-gray-900 mb-3">Activité Récente</h5>
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                ${user.recentActivity.length > 0 ? user.recentActivity.map(activity => `
+                  <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">${activity.module_name || 'Module inconnu'}</p>
+                      <p class="text-xs text-gray-600">${activity.mode} - ${new Date(activity.started_at).toLocaleDateString('fr-FR')}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-sm font-medium ${activity.completed_at ? 'text-green-600' : 'text-yellow-600'}">
+                        ${activity.completed_at ? `${activity.score}/${activity.total}` : 'En cours'}
+                      </p>
+                      ${activity.completed_at ? `<p class="text-xs text-gray-500">${Math.round((activity.score / activity.total) * 100)}%</p>` : ''}
+                    </div>
+                  </div>
+                `).join('') : '<p class="text-gray-500 text-center py-4">Aucune activité récente</p>'}
+              </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="flex space-x-3 pt-4 border-t">
+              <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" class="px-4 py-2 rounded-md ${user.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white">
+                ${user.isActive ? 'Désactiver' : 'Activer'} l'utilisateur
+              </button>
+              <button onclick="closeUserDetailsModal()" class="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-700">
+                Fermer
+              </button>
+            </div>
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error('Error loading user details:', error);
+        const content = document.getElementById('user-details-content');
+        content.innerHTML = `
+          <div class="text-center py-8">
+            <p class="text-red-600">Erreur lors du chargement des détails de l'utilisateur</p>
+            <button onclick="closeUserDetailsModal()" class="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-md">
+              Fermer
+            </button>
+          </div>
+        `;
+      }
+    }
+    
+    // Close user details modal
+    function closeUserDetailsModal() {
+      document.getElementById('user-details-modal').classList.add('hidden');
+    }
+    
+    // Toggle user active status
+    async function toggleUserStatus(userId, newStatus) {
+      try {
+        const response = await fetch(`${API_BASE}/admin/users/${userId}/status`, {
+          method: 'PATCH',
+          headers: headers(),
+          body: JSON.stringify({ isActive: newStatus })
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update user status');
+        }
+        
+        showAlert('success', `Statut utilisateur ${newStatus ? 'activé' : 'désactivé'} avec succès`);
+        loadUsers(); // Reload users
+        
+      } catch (error) {
+        console.error('Error updating user status:', error);
+        showAlert('error', 'Erreur lors de la mise à jour du statut: ' + error.message);
+      }
+    }
+    
+    // Export users to CSV
+    function exportUsersCSV() {
+      if (filteredUsers.length === 0) {
+        showAlert('error', 'Aucun utilisateur à exporter');
+        return;
+      }
+      
+      const headers = ['Nom', 'Prénom', 'Username', 'Email', 'Niveau', 'Date Inscription', 'Dernière Activité', 'Statut'];
+      const csvContent = [
+        headers.join(','),
+        ...filteredUsers.map(user => [
+          user.lastName || '',
+          user.firstName || '',
+          user.username,
+          user.email,
+          user.role,
+          user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '',
+          user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString('fr-FR') : '',
+          user.isActive ? 'Actif' : 'Inactif'
+        ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','))
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `utilisateurs-${currentUserYear}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+    
+    // Event listeners for user management
+    document.getElementById('refresh-users').addEventListener('click', loadUsers);
+    document.getElementById('export-users').addEventListener('click', exportUsersCSV);
+    // Add User modal open/close
+    const addUserModal = document.getElementById('add-user-modal');
+    const addUserOpenBtn = document.getElementById('add-user-open');
+    const addUserCloseBtn = document.getElementById('add-user-close');
+    const addUserCancelBtn = document.getElementById('add-user-cancel');
+    const addUserSubmitBtn = document.getElementById('add-user-submit');
+    const addUserError = document.getElementById('add-user-error');
+    const genCodeBtn = document.getElementById('gen-code');
+    function openAddUserModal() {
+      addUserError.classList.add('hidden');
+      addUserError.textContent = '';
+      document.getElementById('add-name').value = '';
+      document.getElementById('add-email').value = '';
+      document.getElementById('add-password').value = '';
+      document.getElementById('add-code').value = '';
+      document.getElementById('add-role').value = currentUserYear || '4A';
+      addUserModal.classList.remove('hidden');
+    }
+    function closeAddUserModal() {
+      addUserModal.classList.add('hidden');
+    }
+    addUserOpenBtn.addEventListener('click', openAddUserModal);
+    addUserCloseBtn.addEventListener('click', closeAddUserModal);
+    addUserCancelBtn.addEventListener('click', closeAddUserModal);
+    genCodeBtn.addEventListener('click', () => {
+      const role = document.getElementById('add-role').value || '4A';
+      const date = new Date();
+      const y = String(date.getFullYear()).slice(-2);
+      const rnd = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      const code = `${role}-${y}-${rnd}`;
+      document.getElementById('add-code').value = code;
+    });
+
+    // Submit create user
+    addUserSubmitBtn.addEventListener('click', async () => {
+      try {
+        addUserSubmitBtn.disabled = true;
+        addUserSubmitBtn.textContent = 'Création...';
+        addUserError.classList.add('hidden');
+        addUserError.textContent = '';
+
+        const name = document.getElementById('add-name').value.trim();
+        const email = document.getElementById('add-email').value.trim();
+        const password = document.getElementById('add-password').value;
+        const role = document.getElementById('add-role').value;
+        let code = document.getElementById('add-code').value.trim();
+        // Sanitize code: uppercase and keep only A-Z, 0-9 and dashes
+        code = code.toUpperCase().replace(/[^A-Z0-9-]/g, '-').replace(/--+/g,'-');
+        document.getElementById('add-code').value = code;
+
+        if (!email || !password || !role || !code) {
+          throw new Error('Veuillez remplir email, mot de passe, niveau et code');
+        }
+        if (password.length < 6) {
+          throw new Error('Le mot de passe doit contenir au moins 6 caractères');
+        }
+
+        const res = await fetch(`${API_BASE}/admin/users`, {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ name, email, password, role, code })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || 'Erreur lors de la création');
+        }
+
+        showAlert('success', 'Utilisateur créé avec succès');
+        closeAddUserModal();
+        loadUsers();
+      } catch (e) {
+        addUserError.textContent = e.message || 'Erreur inconnue';
+        addUserError.classList.remove('hidden');
+      } finally {
+        addUserSubmitBtn.disabled = false;
+        addUserSubmitBtn.textContent = 'Créer';
+      }
+    });
+    
+    // Search functionality
+    userSearch.addEventListener('input', () => {
+      clearTimeout(userSearch.searchTimeout);
+      userSearch.searchTimeout = setTimeout(filterUsers, 300);
+    });
+    
+    // Load initial user data
+    loadUsers();
+    
+    // Generate test data if no backend is available
+    function generateTestUsers() {
+      const testUsers = {
+        '4A': [
+          {
+            id: '1',
+            username: 'marie_dupont',
+            email: 'marie.dupont@example.com',
+            firstName: 'Marie',
+            lastName: 'Dupont',
+            role: '4A',
+            isActive: true,
+            createdAt: '2024-01-15T10:00:00Z',
+            lastLoginAt: '2024-09-25T14:30:00Z'
+          },
+          {
+            id: '2',
+            username: 'jean_martin',
+            email: 'jean.martin@example.com',
+            firstName: 'Jean',
+            lastName: 'Martin',
+            role: '4A',
+            isActive: true,
+            createdAt: '2024-02-10T09:15:00Z',
+            lastLoginAt: '2024-09-24T16:45:00Z'
+          },
+          {
+            id: '3',
+            username: 'sophie_bernard',
+            email: 'sophie.bernard@example.com',
+            firstName: 'Sophie',
+            lastName: 'Bernard',
+            role: '4A',
+            isActive: false,
+            createdAt: '2024-01-20T11:30:00Z',
+            lastLoginAt: '2024-08-15T10:20:00Z'
+          }
+        ],
+        '5A': [
+          {
+            id: '4',
+            username: 'pierre_durand',
+            email: 'pierre.durand@example.com',
+            firstName: 'Pierre',
+            lastName: 'Durand',
+            role: '5A',
+            isActive: true,
+            createdAt: '2023-09-01T08:00:00Z',
+            lastLoginAt: '2024-09-26T09:15:00Z'
+          },
+          {
+            id: '5',
+            username: 'claire_moreau',
+            email: 'claire.moreau@example.com',
+            firstName: 'Claire',
+            lastName: 'Moreau',
+            role: '5A',
+            isActive: true,
+            createdAt: '2023-09-05T10:30:00Z',
+            lastLoginAt: '2024-09-25T18:20:00Z'
+          }
+        ],
+        '6A': [
+          {
+            id: '6',
+            username: 'thomas_petit',
+            email: 'thomas.petit@example.com',
+            firstName: 'Thomas',
+            lastName: 'Petit',
+            role: '6A',
+            isActive: true,
+            createdAt: '2022-09-01T08:00:00Z',
+            lastLoginAt: '2024-09-26T07:45:00Z'
+          }
+        ],
+        'RES': [
+          {
+            id: '7',
+            username: 'dr_laurent',
+            email: 'laurent@example.com',
+            firstName: 'Dr. Laurent',
+            lastName: 'Rousseau',
+            role: 'RES',
+            isActive: true,
+            createdAt: '2021-09-01T08:00:00Z',
+            lastLoginAt: '2024-09-26T12:00:00Z'
+          }
+        ]
+      };
+      
+      // Simulate API response
+      setTimeout(() => {
+        allUsers = testUsers[currentUserYear] || [];
+        const counts = {
+          '4A': testUsers['4A'].length,
+          '5A': testUsers['5A'].length,
+          '6A': testUsers['6A'].length,
+          'RES': testUsers['RES'].length
+        };
+        updateUserCounts(counts);
+        filterUsers();
+        showUsersLoading(false);
+      }, 500);
+    }
+    
+    // Override loadUsers to use test data if API fails
+    const originalLoadUsers = loadUsers;
+    loadUsers = async function() {
+      try {
+        await originalLoadUsers();
+      } catch (error) {
+        console.log('API not available, using test data');
+        showUsersLoading(true);
+        generateTestUsers();
+      }
+    };
+  </script>
+  <script>
+    function exportCsv(moduleId, qcms) {
+      // Create CSV content
+      const rows = qcms.map(q => {
+        // Escape quotes and wrap in quotes
+        const escapeCsv = str => `"${String(str || '').replace(/"/g, '""')}"`;
+        
+        // Get choices (at least 4, pad with empty if needed)
+        const choices = [];
+        for (let i = 0; i < 4; i++) {
+          choices.push(escapeCsv(q.choices[i]?.text || ''));
+        }
+        
+        // Format: question,choice1,choice2,choice3,choice4,answer_index,difficulty,explanation
+        return [
+          escapeCsv(q.question),
+          ...choices,
+          q.answer_index + 1, // Convert to 1-based index for CSV
+          q.difficulty || 'Medium',
+          escapeCsv(q.explanation || '')
+        ].join(',');
+      });
+      
+      // Add header row
+      const header = 'Question,Choice 1,Choice 2,Choice 3,Choice 4,Correct Answer,Difficulty,Explanation';
+      const csvContent = [header, ...rows].join('\n');
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Set filename with module ID and date
+      const moduleName = document.querySelector(`option[value="${moduleId}"]`)?.textContent || 'module';
+      const date = new Date().toISOString().split('T')[0];
+      link.download = `qcm-${moduleName.toLowerCase().replace(/\s+/g, '-')}-${date}.csv`;
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

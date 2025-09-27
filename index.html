@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ResicoQCM - La Meilleure Façon d'Apprendre la Médecine avec des QCM</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa726 100%);
+        }
+        
+        .gradient-bg {
+            background: var(--primary-gradient);
+        }
+        
+        .gradient-success {
+            background: var(--success-gradient);
+        }
+        
+        .gradient-warning {
+            background: var(--warning-gradient);
+        }
+        
+        .gradient-danger {
+            background: var(--danger-gradient);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .dark {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-white {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
+        .dark .text-gray-900 {
+            color: #f1f5f9;
+        }
+        
+        .dark .text-gray-600 {
+            color: #94a3b8;
+        }
+        
+        .dark .text-gray-500 {
+            color: #64748b;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #334155;
+        }
+        
+        .dark .glass-effect {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.5s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .stat-card {
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring__circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        
+        .metric-icon {
+            background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .metric-icon {
+            background: linear-gradient(145deg, #334155, #475569);
+        }
+        
+        .dark .text-gray-800 {
+            color: #e2e8f0;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #1a202c;
+        }
+        
+        /* Interactive Elements */
+        .btn-primary {
+            background: var(--primary-gradient);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+        
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+            bottom: calc(100% + 5px);
+        }
+        
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .ripple:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 16px 20px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid #10b981;
+        }
+        
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+        
+        .notification.info {
+            border-left: 4px solid #3b82f6;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans transition-colors duration-300" id="body">
+    <!-- Auth Modal -->
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 class="text-xl font-semibold text-gray-800" id="authModalTitle">Connexion</h3>
+                <button onclick="closeAuthModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="loginForm">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="loginEmail">Email ou Nom d'utilisateur</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="loginEmail" type="text" placeholder="Email ou nom d'utilisateur">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="loginPassword">Mot de passe</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="loginPassword" type="password" placeholder="Mot de passe">
+                    </div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <input id="rememberMe" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="rememberMe" class="ml-2 block text-sm text-gray-700">Se souvenir de moi</label>
+                        </div>
+                        <a href="#" onclick="showForgotPassword()" class="text-sm text-indigo-600 hover:text-indigo-500">Mot de passe oublié ?</a>
+                    </div>
+                    <button onclick="login()" class="w-full gradient-bg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:opacity-90 transition">
+                        Se connecter
+                    </button>
+                    <p class="text-center text-gray-600 text-sm mt-4">
+                        Pas de compte ? <a href="#" onclick="showSignup()" class="text-indigo-600 hover:text-indigo-500">S'inscrire</a>
+                    </p>
+                </div>
+
+                <div id="signupForm" class="hidden">
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signupUsername">Nom d'utilisateur</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signupUsername" type="text" placeholder="Nom d'utilisateur">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signupEmail">Email</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signupEmail" type="email" placeholder="Email">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signupPassword">Mot de passe</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signupPassword" type="password" placeholder="Mot de passe">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="signupConfirmPassword">Confirmer le mot de passe</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signupConfirmPassword" type="password" placeholder="Confirmer le mot de passe">
+                    </div>
+                    <button onclick="signup()" class="w-full gradient-bg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:opacity-90 transition">
+                        S'inscrire
+                    </button>
+                    <p class="text-center text-gray-600 text-sm mt-4">
+                        Déjà un compte ? <a href="#" onclick="showLogin()" class="text-indigo-600 hover:text-indigo-500">Se connecter</a>
+                    </p>
+                </div>
+
+                <div id="forgotPasswordForm" class="hidden">
+                    <div class="mb-6">
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="forgotEmail">Email</label>
+                        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="forgotEmail" type="email" placeholder="Email">
+                        <p class="text-gray-600 text-xs mt-2">Nous vous enverrons un lien pour réinitialiser votre mot de passe.</p>
+                    </div>
+                    <button onclick="resetPassword()" class="w-full gradient-bg text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:opacity-90 transition">
+                        Envoyer le lien
+                    </button>
+                    <p class="text-center text-gray-600 text-sm mt-4">
+                        Vous vous souvenez de votre mot de passe ? <a href="#" onclick="showLogin()" class="text-indigo-600 hover:text-indigo-500">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] flex">
+            <!-- Sidebar Navigation -->
+            <div class="w-64 bg-gray-50 rounded-l-lg border-r">
+                <div class="p-4 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">Paramètres</h3>
+                </div>
+                <nav class="p-2">
+                    <button onclick="showProfileTab()" id="profileTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md mb-1 bg-gray-100">
+                        <i data-feather="user" class="w-4 h-4 mr-3"></i>
+                        Profil
+                    </button>
+                    <button onclick="showPasswordTab()" id="passwordTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md">
+                        <i data-feather="lock" class="w-4 h-4 mr-3"></i>
+                        Mot de passe
+                    </button>
+                </nav>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col">
+                <!-- Header -->
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h2 class="text-xl font-semibold text-gray-800" id="modalTitle">Profil</h2>
+                    <button onclick="closeUserProfileModal()" class="text-gray-500 hover:text-gray-700">
+                        <i data-feather="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                <!-- Profile Tab Content -->
+                <div id="profileTabContent" class="flex-1 p-6 overflow-y-auto">
+                    <div class="max-w-2xl">
+                        <!-- Avatar Section -->
+                        <div class="flex items-center mb-8">
+                            <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mr-6">
+                                <span class="text-white text-2xl font-bold" id="profileAvatarInitials">EM</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900" id="profileDisplayName">Étudiant en Médecine</h3>
+                                <p class="text-sm text-gray-500">Membre depuis <span id="profileMemberSince">2024</span></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Form -->
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">First name:</label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                           id="profileFirstName" type="text" placeholder="Prénom">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Last name:</label>
+                                    <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                           id="profileLastName" type="text" placeholder="Nom de famille">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Username:</label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                       id="profileUsername" type="text" placeholder="Nom d'utilisateur">
+                                <p class="text-xs text-gray-500 mt-1">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email address:</label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                       id="profileEmail" type="email" placeholder="email@example.com">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Niveau d'étude:</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                        id="profileLevel">
+                                    <option value="4A">4ème Année</option>
+                                    <option value="5A">5ème Année</option>
+                                    <option value="6A">6ème Année</option>
+                                    <option value="RES">Résident</option>
+                                </select>
+                            </div>
+                            
+                            <div class="pt-4">
+                                <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    Sauvegarder les modifications
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Password Tab Content -->
+                <div id="passwordTabContent" class="flex-1 p-6 overflow-y-auto" style="display: none;">
+                    <div class="max-w-md">
+                        <h3 class="text-lg font-medium text-gray-900 mb-6">Changer le mot de passe</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel:</label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                       id="currentPassword" type="password" placeholder="Mot de passe actuel">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe:</label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                       id="newPassword" type="password" placeholder="Nouveau mot de passe">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le nouveau mot de passe:</label>
+                                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                                       id="confirmNewPassword" type="password" placeholder="Confirmer le nouveau mot de passe">
+                            </div>
+                            <div class="pt-4">
+                                <button onclick="changePassword()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                    Changer le mot de passe
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="book-open" class="h-6 w-6 text-indigo-600"></i>
+                        <span class="ml-2 text-xl font-bold text-gray-900">ResicoQCM</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Tableau de bord</a>
+                        <a href="exploration.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Exploration</a>
+                        <a href="revision.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Révision</a>
+                        <a href="exam.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examen</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <i data-feather="moon" id="darkModeIcon"></i>
+                    </button>
+                    <!-- User Profile -->
+                    <div class="relative" id="userProfileDropdown">
+                        <button onclick="toggleProfileMenu()" class="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center">
+                                <i data-feather="user" class="h-4 w-4 text-white"></i>
+                            </div>
+                            <span class="text-gray-700" id="userDisplayName">Profil</span>
+                            <i data-feather="chevron-down" class="h-4 w-4 text-gray-400"></i>
+                        </button>
+                        <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="#" onclick="showUserProfile()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="login.html" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" aria-controls="mobile-menu" aria-expanded="false">
+                        <i data-feather="menu"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="index.html" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Tableau de bord</a>
+                <a href="exploration.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Exploration</a>
+                <a href="revision.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Révision</a>
+                <a href="exam.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Examen</a>
+                <div class="mt-4 p-4">
+                    <button onclick="toggleProfileMenu()" class="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 text-center">
+                        Profil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+                La meilleure façon d'apprendre la médecine avec des QCM
+            </h1>
+            <p class="mt-5 max-w-xl mx-auto text-xl text-gray-500">
+                Maîtrisez les concepts médicaux grâce à des milliers de questions à choix multiples de haute qualité.
+            </p>
+        </div>
+
+        <!-- Modern Stats Grid with Animations -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <!-- QCM Disponibles -->
+            <div class="stat-card rounded-2xl shadow-lg card-hover fade-in-up" data-aos="fade-up" data-aos-delay="100">
+                <div class="px-6 py-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">QCM Disponibles</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white" id="stat-total">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                            <div class="flex items-center mt-2">
+                                <span class="text-xs text-green-600 font-medium">+12% ce mois</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon rounded-full p-4 float-animation">
+                            <i data-feather="book-open" class="h-8 w-8 text-indigo-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QCM Répondus -->
+            <div class="stat-card rounded-2xl shadow-lg card-hover fade-in-up" data-aos="fade-up" data-aos-delay="200">
+                <div class="px-6 py-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">QCM Répondus</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white" id="stat-answered">
+                                <span class="counter" data-target="0">0</span>
+                            </p>
+                            <div class="flex items-center mt-2">
+                                <span class="text-xs text-blue-600 font-medium">Cette semaine</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon rounded-full p-4 float-animation" style="animation-delay: 0.5s;">
+                            <i data-feather="check-circle" class="h-8 w-8 text-green-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Taux de Réussite -->
+            <div class="stat-card rounded-2xl shadow-lg card-hover fade-in-up" data-aos="fade-up" data-aos-delay="300">
+                <div class="px-6 py-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Taux de Réussite</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white" id="stat-success">
+                                <span class="counter" data-target="0">0</span>%
+                            </p>
+                            <div class="flex items-center mt-2">
+                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                                    <div class="gradient-success h-2 rounded-full transition-all duration-1000" id="success-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="metric-icon rounded-full p-4 float-animation" style="animation-delay: 1s;">
+                            <i data-feather="trending-up" class="h-8 w-8 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Temps d'étude -->
+            <div class="stat-card rounded-2xl shadow-lg card-hover fade-in-up" data-aos="fade-up" data-aos-delay="400">
+                <div class="px-6 py-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Temps d'Étude</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white" id="stat-time">0h</p>
+                            <div class="flex items-center mt-2">
+                                <span class="text-xs text-purple-600 font-medium">Temps total</span>
+                            </div>
+                        </div>
+                        <div class="metric-icon rounded-full p-4 float-animation" style="animation-delay: 1.5s;">
+                            <i data-feather="clock" class="h-8 w-8 text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Performance Radar Chart -->
+            <div class="stat-card rounded-2xl shadow-lg p-8 card-hover" data-aos="fade-up" data-aos-delay="500">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Performance par Module</h3>
+                    <div class="pulse-animation">
+                        <i data-feather="target" class="h-6 w-6 text-indigo-600"></i>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Weekly Activity Chart -->
+            <div class="stat-card rounded-2xl shadow-lg p-8 card-hover" data-aos="fade-up" data-aos-delay="600">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Activité Hebdomadaire</h3>
+                    <div class="pulse-animation">
+                        <i data-feather="activity" class="h-6 w-6 text-green-600"></i>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Progress Doughnut Chart -->
+            <div class="stat-card rounded-2xl shadow-lg p-8 card-hover" data-aos="fade-up" data-aos-delay="700">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Répartition des Résultats</h3>
+                    <div class="pulse-animation">
+                        <i data-feather="pie-chart" class="h-6 w-6 text-purple-600"></i>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Timeline Chart -->
+        <div class="stat-card rounded-2xl shadow-lg p-8 mb-12 card-hover" data-aos="fade-up" data-aos-delay="800">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Progression dans le Temps</h3>
+                <div class="flex space-x-4">
+                    <button class="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-100 rounded-lg hover:bg-indigo-200 transition-colors" onclick="updateTimelineChart('week')">7 jours</button>
+                    <button class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" onclick="updateTimelineChart('month')">30 jours</button>
+                    <button class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors" onclick="updateTimelineChart('year')">1 an</button>
+                </div>
+            </div>
+            <div style="height: 400px;">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Continue Where You Left Off -->
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-medium text-gray-900">Continuez où vous vous êtes arrêté</h2>
+                <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Voir tout</a>
+            </div>
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                            <i data-feather="play" class="h-6 w-6 text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">Cardiology Module</h3>
+                            <p class="mt-1 text-sm text-gray-500">Last attempted: 2 days ago</p>
+                            <div class="mt-2 flex items-center text-sm text-gray-500">
+                                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                </svg>
+                                15/50 questions completed
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <a href="exploration.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Continue
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Modes -->
+        <div class="mb-12">
+            <h2 class="text-lg font-medium text-gray-900 mb-6">Choose your study mode</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Exploration Mode -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-indigo-100 text-indigo-600 mb-4">
+                            <i data-feather="search"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Exploration Mode</h3>
+                        <p class="text-gray-500 mb-4">
+                            Browse QCMs by course or source, apply filters, and resume where you left off.
+                        </p>
+                        <a href="exploration.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Start Exploring
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Revision Mode -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-600 mb-4">
+                            <i data-feather="repeat"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Revision Mode</h3>
+                        <p class="text-gray-500 mb-4">
+                            Use spaced repetition to prioritize weak questions and reinforce your knowledge.
+                        </p>
+                        <a href="revision.html" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Start Revising
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Exam Mode -->
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
+                    <div class="p-6">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 text-purple-600 mb-4">
+                            <i data-feather="clock"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Exam Mode</h3>
+                        <p class="text-gray-500 mb-4">
+                            Simulate real exams from past papers or create custom exams with your preferences.
+                        </p>
+                        <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Start Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QCM Sources -->
+        <div class="mb-12">
+            <h2 class="text-lg font-medium text-gray-900 mb-6">QCM Sources</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-600 mb-2">
+                        <i data-feather="bookmark"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900">Résidanat Constantine</h3>
+                    <p class="mt-1 text-xs text-gray-500">2,847 QCMs</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-md bg-green-100 text-green-600 mb-2">
+                        <i data-feather="bookmark"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900">Externat Constantine</h3>
+                    <p class="mt-1 text-xs text-gray-500">1,923 QCMs</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-md bg-purple-100 text-purple-600 mb-2">
+                        <i data-feather="bookmark"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900">4ème Année Constantine</h3>
+                    <p class="mt-1 text-xs text-gray-500">1,456 QCMs</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-4 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-md bg-yellow-100 text-yellow-600 mb-2">
+                        <i data-feather="bookmark"></i>
+                    </div>
+                    <h3 class="text-sm font-medium text-gray-900">5ème Année Constantine</h3>
+                    <p class="mt-1 text-xs text-gray-500">2,134 QCMs</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="md:flex md:items-center md:justify-between">
+                <div class="flex justify-center md:order-2 space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i data-feather="twitter"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i data-feather="facebook"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                        <i data-feather="instagram"></i>
+                    </a>
+                </div>
+                <div class="mt-8 md:mt-0 md:order-1">
+                    <p class="text-center text-base text-gray-400">
+                        &copy; 2023 ResicoQCM. Developed by [Your Name]. More features coming soon.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('[aria-controls="mobile-menu"]').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Auth modal functions
+        function openAuthModal(type) {
+            document.getElementById('authModal').classList.remove('hidden');
+            if (type === 'login') {
+                showLogin();
+            } else if (type === 'signup') {
+                showSignup();
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('authModalTitle').textContent = 'Login';
+        }
+
+        function showSignup() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.remove('hidden');
+            document.getElementById('forgotPasswordForm').classList.add('hidden');
+            document.getElementById('authModalTitle').textContent = 'Sign Up';
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('signupForm').classList.add('hidden');
+            document.getElementById('forgotPasswordForm').classList.remove('hidden');
+            document.getElementById('authModalTitle').textContent = 'Forgot Password';
+        }
+
+        // Mock auth functions
+        function login() {
+            alert('Login functionality would be implemented here');
+            // Close modal after "login"
+            closeAuthModal();
+        }
+
+        function signup() {
+            alert('Signup functionality would be implemented here');
+            // Close modal after "signup"
+            closeAuthModal();
+        }
+
+        function resetPassword() {
+            alert('Un lien de réinitialisation sera envoyé à votre email');
+            // Return to login after reset
+            showLogin();
+        }
+
+        // Dark Mode Functions
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (isDark) {
+                body.classList.remove('dark');
+                if (icon) icon.setAttribute('data-feather', 'moon');
+                localStorage.setItem('darkMode', 'false');
+            } else {
+                body.classList.add('dark');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+                localStorage.setItem('darkMode', 'true');
+            }
+            feather.replace();
+        }
+
+        // User Profile Functions
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        async function showUserProfile() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Décoder le token JWT pour obtenir les informations utilisateur
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const profile = {
+                    username: payload.username || payload.email || 'Utilisateur',
+                    email: payload.email || 'Non spécifié',
+                    level: payload.role || 'Non spécifié',
+                    firstName: payload.firstName || '',
+                    lastName: payload.lastName || '',
+                    created_at: payload.iat ? new Date(payload.iat * 1000).toISOString() : new Date().toISOString()
+                };
+                
+                // Remplir les champs du profil
+                document.getElementById('profileUsername').value = profile.username;
+                document.getElementById('profileEmail').value = profile.email;
+                document.getElementById('profileLevel').value = profile.level;
+                document.getElementById('profileFirstName').value = profile.firstName;
+                document.getElementById('profileLastName').value = profile.lastName;
+                
+                // Mettre à jour l'affichage
+                const fullName = `${profile.firstName} ${profile.lastName}`.trim() || profile.username;
+                document.getElementById('profileDisplayName').textContent = fullName;
+                document.getElementById('profileMemberSince').textContent = new Date(profile.created_at).getFullYear();
+                
+                // Mettre à jour les initiales
+                const initials = fullName.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                
+                // S'assurer que l'onglet profil est affiché par défaut
+                showProfileTab();
+                
+                document.getElementById('userProfileModal').classList.remove('hidden');
+                document.getElementById('profileMenu').classList.add('hidden');
+                
+                // Réinitialiser les icônes Feather
+                feather.replace();
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement du profil');
+            }
+        }
+
+        function closeUserProfileModal() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        function showPasswordChange() {
+            document.getElementById('passwordChangeModal').classList.remove('hidden');
+            document.getElementById('profileMenu').classList.add('hidden');
+        }
+
+        function closePasswordChangeModal() {
+            document.getElementById('passwordChangeModal').classList.add('hidden');
+            // Clear form
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('Les nouveaux mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour changer votre mot de passe');
+                    return;
+                }
+
+                const response = await fetch('http://localhost:8001/api/user/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+                });
+
+                if (response.ok) {
+                    alert('Mot de passe changé avec succès !');
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    alert('Erreur: ' + (error.message || 'Impossible de changer le mot de passe'));
+                    return;
+                }
+                
+                // Nettoyer les champs
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                
+            } catch (error) {
+                console.error('Erreur lors du changement de mot de passe:', error);
+                alert('Erreur lors du changement de mot de passe');
+            }
+        }
+
+        function showProfileTab() {
+            console.log('showProfileTab called');
+            
+            // Vérifier que les éléments existent
+            const profileTab = document.getElementById('profileTabContent');
+            const passwordTab = document.getElementById('passwordTabContent');
+            const profileBtn = document.getElementById('profileTabBtn');
+            const passwordBtn = document.getElementById('passwordTabBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            if (!profileTab || !passwordTab) {
+                console.error('Required elements not found for profile tab!');
+                return;
+            }
+            
+            // Afficher le contenu du profil et masquer celui du mot de passe
+            profileTab.style.display = 'block';
+            passwordTab.style.display = 'none';
+            
+            // Mettre à jour les boutons de navigation
+            if (profileBtn) profileBtn.classList.add('bg-gray-100');
+            if (passwordBtn) passwordBtn.classList.remove('bg-gray-100');
+            
+            // Mettre à jour le titre
+            if (modalTitle) modalTitle.textContent = 'Profil';
+            
+            // Forcer la mise à jour des icônes
+            setTimeout(() => {
+                feather.replace();
+            }, 100);
+            
+            console.log('Profile tab should now be visible');
+        }
+
+        function showPasswordTab() {
+            console.log('showPasswordTab called');
+            
+            // Vérifier que les éléments existent
+            const profileTab = document.getElementById('profileTabContent');
+            const passwordTab = document.getElementById('passwordTabContent');
+            const profileBtn = document.getElementById('profileTabBtn');
+            const passwordBtn = document.getElementById('passwordTabBtn');
+            const modalTitle = document.getElementById('modalTitle');
+            
+            console.log('Elements found:', {
+                profileTab: !!profileTab,
+                passwordTab: !!passwordTab,
+                profileBtn: !!profileBtn,
+                passwordBtn: !!passwordBtn,
+                modalTitle: !!modalTitle
+            });
+            
+            if (!profileTab || !passwordTab) {
+                console.error('Required elements not found!');
+                return;
+            }
+            
+            // Afficher le contenu du mot de passe et masquer celui du profil
+            profileTab.style.display = 'none';
+            passwordTab.style.display = 'block';
+            
+            // Mettre à jour les boutons de navigation
+            if (profileBtn) profileBtn.classList.remove('bg-gray-100');
+            if (passwordBtn) passwordBtn.classList.add('bg-gray-100');
+            
+            // Mettre à jour le titre
+            if (modalTitle) modalTitle.textContent = 'Changer le mot de passe';
+            
+            // Nettoyer les champs de mot de passe
+            const currentPwd = document.getElementById('currentPassword');
+            const newPwd = document.getElementById('newPassword');
+            const confirmPwd = document.getElementById('confirmNewPassword');
+            
+            if (currentPwd) currentPwd.value = '';
+            if (newPwd) newPwd.value = '';
+            if (confirmPwd) confirmPwd.value = '';
+            
+            // Forcer la mise à jour des icônes
+            setTimeout(() => {
+                feather.replace();
+            }, 100);
+            
+            console.log('Password tab should now be visible');
+        }
+
+        async function saveProfile() {
+            try {
+                const firstName = document.getElementById('profileFirstName').value;
+                const lastName = document.getElementById('profileLastName').value;
+                const username = document.getElementById('profileUsername').value;
+                const email = document.getElementById('profileEmail').value;
+                const level = document.getElementById('profileLevel').value;
+
+                if (!username || !email) {
+                    alert('Le nom d\'utilisateur et l\'email sont requis');
+                    return;
+                }
+
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour sauvegarder votre profil');
+                    return;
+                }
+
+                const resp = await fetch('http://localhost:8001/api/user/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ firstName, lastName, username, email })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.message || 'Impossible de sauvegarder le profil');
+                }
+
+                alert('Profil sauvegardé avec succès !');
+                
+                // Mettre à jour l'affichage
+                const fullName = `${firstName} ${lastName}`.trim() || username;
+                document.getElementById('profileDisplayName').textContent = fullName;
+                
+                // Mettre à jour les initiales
+                const initials = fullName.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                
+                // Mettre à jour le nom d'affichage dans la navigation
+                const userDisplayName = document.getElementById('userDisplayName');
+                if (userDisplayName) {
+                    userDisplayName.textContent = fullName;
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde du profil');
+            }
+        }
+
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('token');
+                alert('Déconnexion réussie');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Initialize dark mode
+        function initializeDarkMode() {
+            const savedMode = localStorage.getItem('darkMode');
+            if (savedMode === 'true') {
+                document.body.classList.add('dark');
+                const icon = document.getElementById('darkModeIcon');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.getElementById('userProfileDropdown');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (!profileDropdown.contains(event.target)) {
+                profileMenu.classList.add('hidden');
+            }
+        });
+
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Initialize dark mode on page load
+        initializeDarkMode();
+        
+        // Replace feather icons
+        feather.replace();
+        
+        // Dashboard data fetching (requires auth)
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Fetch real user progress data
+                const [progressRes, modulesRes, resultsRes] = await Promise.all([
+                    fetch('http://localhost:8001/api/progress/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:8001/api/modules/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:8001/api/results/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (!progressRes.ok || !modulesRes.ok || !resultsRes.ok) {
+                    throw new Error('Erreur lors du chargement des données');
+                }
+
+                const progressData = await progressRes.json();
+                const modulesData = await modulesRes.json();
+                const resultsData = await resultsRes.json();
+
+                // Update dashboard with real data
+                updateDashboardStats(progressData, modulesData, resultsData);
+                updateProgressCharts(progressData, resultsData);
+                updateRecentActivity(resultsData, modulesData);
+
+            } catch (error) {
+                console.error('Erreur chargement dashboard:', error);
+                // Fallback to demo data if API fails
+                loadDemoData();
+            }
+        }
+
+        function updateDashboardStats(progressData, modulesData, resultsData) {
+            // Total QCMs available (count from all modules)
+            const totalQcms = modulesData.reduce((sum, module) => sum + (module.qcm_count || 0), 0);
+            const totalElement = document.querySelector('#stat-total .counter') || document.querySelector('.text-2xl.font-semibold.text-gray-900');
+            if (totalElement) {
+                totalElement.textContent = totalQcms.toLocaleString();
+            }
+
+            // QCMs answered
+            let totalAnswered = progressData.overall?.total_solved;
+            if (typeof totalAnswered !== 'number') {
+                // Fallback: sum totals from recent results
+                totalAnswered = (Array.isArray(resultsData) ? resultsData : []).reduce((sum, r) => {
+                    const t = (typeof r.total === 'number') ? r.total : (typeof r.total_questions === 'number' ? r.total_questions : 0);
+                    return sum + t;
+                }, 0);
+            }
+            const answeredElement = document.querySelector('#stat-answered .counter') || document.getElementById('stat-answered');
+            if (answeredElement) {
+                answeredElement.textContent = totalAnswered.toLocaleString();
+            }
+
+            // Success rate
+            let successRate = progressData.overall?.success_rate;
+            if (typeof successRate !== 'number') {
+                const correct = progressData.overall?.correct_count ?? progressData.overall?.correct_sum;
+                const wrong = progressData.overall?.wrong_count ?? progressData.overall?.wrong_sum;
+                if (typeof correct === 'number' && typeof wrong === 'number' && (correct + wrong) > 0) {
+                    successRate = Math.round((correct / (correct + wrong)) * 100);
+                } else if (Array.isArray(resultsData) && resultsData.length) {
+                    const totals = resultsData.reduce((acc, r) => {
+                        const t = (typeof r.total === 'number') ? r.total : (typeof r.total_questions === 'number' ? r.total_questions : 0);
+                        const s = (typeof r.score === 'number') ? r.score : 0;
+                        acc.correct += s;
+                        acc.total += t;
+                        return acc;
+                    }, { correct: 0, total: 0 });
+                    successRate = totals.total > 0 ? Math.round((totals.correct / totals.total) * 100) : 0;
+                } else {
+                    successRate = 0;
+                }
+            }
+            const successElement = document.querySelector('#stat-success .counter') || document.getElementById('stat-success');
+            if (successElement) {
+                successElement.textContent = `${Math.round(successRate)}%`;
+            }
+
+            // Study time (calculated from results)
+            const studyTime = calculateStudyTime(resultsData);
+            const timeElement = document.getElementById('stat-time');
+            if (timeElement) {
+                timeElement.textContent = studyTime;
+            }
+        }
+
+        function calculateStudyTime(resultsData) {
+            let totalMinutes = 0;
+            resultsData.forEach(result => {
+                if (result.started_at && result.completed_at) {
+                    const start = new Date(result.started_at);
+                    const end = new Date(result.completed_at);
+                    totalMinutes += (end - start) / (1000 * 60);
+                }
+            });
+            
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = Math.floor(totalMinutes % 60);
+            
+            if (hours > 0) {
+                return `${hours}h${minutes > 0 ? ` ${minutes}m` : ''}`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+
+        function updateProgressCharts(progressData, resultsData) {
+            // Update module performance chart
+            const moduleContainer = document.querySelector('.space-y-4');
+            if (moduleContainer && progressData.modules && Array.isArray(progressData.modules)) {
+                moduleContainer.innerHTML = '';
+                
+                // Sort modules by success rate (descending)
+                const sortedModules = progressData.modules
+                    .filter(module => (module.correct_count + module.wrong_count) > 0)
+                    .sort((a, b) => b.success_rate - a.success_rate)
+                    .slice(0, 6); // Show top 6 modules
+
+                sortedModules.forEach(module => {
+                    const moduleDiv = document.createElement('div');
+                    moduleDiv.className = 'flex items-center justify-between';
+                    
+                    const successRate = module.success_rate || 0;
+                    const totalAnswered = (module.correct_count || 0) + (module.wrong_count || 0);
+                    
+                    // Color based on performance
+                    let barColor = 'bg-red-500';
+                    if (successRate >= 80) barColor = 'bg-green-500';
+                    else if (successRate >= 65) barColor = 'bg-blue-500';
+                    else if (successRate >= 50) barColor = 'bg-yellow-500';
+
+                    moduleDiv.innerHTML = `
+                        <span class="text-sm text-gray-600">${module.module_name}</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="${barColor} h-2 rounded-full" style="width: ${successRate}%"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900">${successRate}%</span>
+                            <span class="text-xs text-gray-500">(${totalAnswered})</span>
+                        </div>
+                    `;
+                    moduleContainer.appendChild(moduleDiv);
+                });
+
+                // If no modules with progress, show message
+                if (sortedModules.length === 0) {
+                    moduleContainer.innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <p>Commencez à répondre aux QCMs pour voir vos statistiques ici</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Update weekly activity chart
+            updateWeeklyActivityChart(resultsData);
+        }
+
+        function updateWeeklyActivityChart(resultsData) {
+            const chartContainer = document.querySelector('.flex.items-end.justify-between.h-32.space-x-2');
+            if (!chartContainer) return;
+
+            // Get last 7 days of activity
+            const today = new Date();
+            const weekDays = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+            const dailyActivity = new Array(7).fill(0);
+
+            resultsData.forEach(result => {
+                if (result.completed_at) {
+                    const resultDate = new Date(result.completed_at);
+                    const daysDiff = Math.floor((today - resultDate) / (1000 * 60 * 60 * 24));
+                    
+                    if (daysDiff >= 0 && daysDiff < 7) {
+                        const dayIndex = (today.getDay() - daysDiff + 7) % 7;
+                        dailyActivity[dayIndex] += result.total || 0;
+                    }
+                }
+            });
+
+            // Find max activity for scaling
+            const maxActivity = Math.max(...dailyActivity, 1);
+
+            chartContainer.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const dayIndex = (today.getDay() - 6 + i + 7) % 7;
+                const activity = dailyActivity[dayIndex];
+                const height = Math.max((activity / maxActivity) * 90, 10); // Min 10% height
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'flex flex-col items-center';
+                dayDiv.innerHTML = `
+                    <div class="bg-indigo-500 rounded-t" style="height: ${height}%; width: 20px;" title="${activity} QCMs"></div>
+                    <span class="text-xs text-gray-500 mt-2">${weekDays[dayIndex]}</span>
+                `;
+                chartContainer.appendChild(dayDiv);
+            }
+        }
+
+        function updateRecentActivity(resultsData, modulesData) {
+            if (!Array.isArray(resultsData) || resultsData.length === 0) {
+                return;
+            }
+            
+            // Find most recent incomplete or recent activity
+            const recentActivity = resultsData.find(result => 
+                !result.completed_at || 
+                (new Date() - new Date(result.completed_at)) < (7 * 24 * 60 * 60 * 1000) // Last 7 days
+            );
+
+            const continueSection = document.querySelector('.bg-white.shadow.rounded-lg.overflow-hidden .p-6');
+            if (continueSection && recentActivity) {
+                const module = modulesData.find(m => m.id === recentActivity.module_id);
+                const moduleName = module?.name || 'Module Inconnu';
+                
+                let statusText, timeText, progressText;
+                
+                if (!recentActivity.completed_at) {
+                    statusText = 'Session en cours';
+                    timeText = `Commencé: ${formatRelativeTime(recentActivity.started_at)}`;
+                    progressText = `${recentActivity.score || 0}/${recentActivity.total || 0} questions`;
+                } else {
+                    statusText = 'Dernière session';
+                    timeText = `Terminé: ${formatRelativeTime(recentActivity.completed_at)}`;
+                    const percentage = recentActivity.total > 0 ? Math.round((recentActivity.score / recentActivity.total) * 100) : 0;
+                    progressText = `${recentActivity.score}/${recentActivity.total} (${percentage}%)`;
+                }
+
+                continueSection.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                            <i data-feather="play" class="h-6 w-6 text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">${moduleName}</h3>
+                            <p class="mt-1 text-sm text-gray-500">${timeText}</p>
+                            <div class="mt-2 flex items-center text-sm text-gray-500">
+                                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                </svg>
+                                ${progressText}
+                            </div>
+                        </div>
+                        <div class="ml-auto">
+                            <a href="exploration.html?module=${recentActivity.module_id}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Continuer
+                            </a>
+                        </div>
+                    </div>
+                `;
+                feather.replace();
+            }
+        }
+
+        function formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+            if (diffDays > 0) {
+                return `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+            } else if (diffHours > 0) {
+                return `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+            } else if (diffMinutes > 0) {
+                return `il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+            } else {
+                return 'à l\'instant';
+            }
+        }
+
+        function loadDemoData() {
+            // Fallback demo data if API fails
+            console.log('Chargement des données de démonstration...');
+        }
+
+        // Chart instances
+        let performanceChart, weeklyChart, progressChart, timelineChart;
+        
+        // Counter animation function
+        function animateCounter(element, target, duration = 2000) {
+            let start = 0;
+            const increment = target / (duration / 16);
+            const timer = setInterval(() => {
+                start += increment;
+                if (start >= target) {
+                    element.textContent = Math.floor(target);
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(start);
+                }
+            }, 16);
+        }
+        
+        // Initialize advanced charts
+        function initializeCharts() {
+            // Performance Radar Chart
+            const performanceCtx = document.getElementById('performanceChart');
+            if (performanceCtx) {
+                performanceChart = new Chart(performanceCtx.getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: [], // Commencer vide, sera rempli avec les vraies données
+                        datasets: [{
+                            label: 'Performance (%)',
+                            data: [], // Commencer vide, sera rempli avec les vraies données
+                            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Weekly Activity Chart
+            const weeklyCtx = document.getElementById('weeklyChart');
+            if (weeklyCtx) {
+                weeklyChart = new Chart(weeklyCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                        datasets: [{
+                            label: 'QCM Répondus',
+                            data: [12, 19, 8, 15, 14, 6, 10],
+                            backgroundColor: [
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(79, 172, 254, 0.8)'
+                            ],
+                            borderColor: 'rgba(79, 172, 254, 1)',
+                            borderWidth: 1,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 5
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Progress Doughnut Chart
+            const progressCtx = document.getElementById('progressChart');
+            if (progressCtx) {
+                progressChart = new Chart(progressCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Correct', 'Incorrect', 'Non Répondus'],
+                        datasets: [{
+                            data: [0, 0, 0],
+                            backgroundColor: [
+                                'rgba(34, 197, 94, 0.8)',
+                                'rgba(239, 68, 68, 0.8)',
+                                'rgba(156, 163, 175, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(34, 197, 94, 1)',
+                                'rgba(239, 68, 68, 1)',
+                                'rgba(156, 163, 175, 1)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Timeline Chart
+            const timelineCtx = document.getElementById('timelineChart');
+            if (timelineCtx) {
+                timelineChart = new Chart(timelineCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                        datasets: [{
+                            label: 'Score Moyen (%)',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgba(102, 126, 234, 1)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }, {
+                            label: 'QCM par Mois',
+                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 10
+                                }
+                            }
+                        },
+                        interaction: {
+                            intersect: false,
+                            mode: 'index'
+                        }
+                    }
+                });
+            }
+        }
+
+        // Update timeline chart based on period using real data
+        function updateTimelineChart(period) {
+            if (!timelineChart) return;
+            
+            // Update button states
+            document.querySelectorAll('button[onclick*="updateTimelineChart"]').forEach(btn => {
+                btn.className = 'px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors';
+            });
+            event.target.className = 'px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-100 rounded-lg hover:bg-indigo-200 transition-colors';
+
+            // Use real results data to generate timeline
+            const resultsData = window.dashboardResultsData || [];
+            let labels, scoreData, qcmData;
+            
+            const now = new Date();
+            const timeGroups = {};
+            
+            switch(period) {
+                case 'week':
+                    labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+                    // Group by day of week for last 7 days
+                    for (let i = 6; i >= 0; i--) {
+                        const date = new Date(now);
+                        date.setDate(date.getDate() - i);
+                        const dayIndex = (date.getDay() + 6) % 7; // Convert to Mon=0 format
+                        const key = labels[dayIndex];
+                        if (!timeGroups[key]) timeGroups[key] = { scores: [], totals: 0 };
+                    }
+                    
+                    resultsData.forEach(result => {
+                        const resultDate = new Date(result.completed_at || result.started_at);
+                        const daysDiff = Math.floor((now - resultDate) / (1000 * 60 * 60 * 24));
+                        if (daysDiff >= 0 && daysDiff < 7) {
+                            const dayIndex = (resultDate.getDay() + 6) % 7;
+                            const key = labels[dayIndex];
+                            if (timeGroups[key]) {
+                                const score = result.score || 0;
+                                const total = result.total || result.total_questions || 0;
+                                if (total > 0) {
+                                    timeGroups[key].scores.push((score / total) * 100);
+                                    timeGroups[key].totals += total;
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'month':
+                    labels = Array.from({length: 30}, (_, i) => `${i + 1}`);
+                    // Group by day of month for last 30 days
+                    for (let i = 29; i >= 0; i--) {
+                        const date = new Date(now);
+                        date.setDate(date.getDate() - i);
+                        const key = date.getDate().toString();
+                        if (!timeGroups[key]) timeGroups[key] = { scores: [], totals: 0 };
+                    }
+                    
+                    resultsData.forEach(result => {
+                        const resultDate = new Date(result.completed_at || result.started_at);
+                        const daysDiff = Math.floor((now - resultDate) / (1000 * 60 * 60 * 24));
+                        if (daysDiff >= 0 && daysDiff < 30) {
+                            const key = resultDate.getDate().toString();
+                            if (timeGroups[key]) {
+                                const score = result.score || 0;
+                                const total = result.total || result.total_questions || 0;
+                                if (total > 0) {
+                                    timeGroups[key].scores.push((score / total) * 100);
+                                    timeGroups[key].totals += total;
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'year':
+                default:
+                    labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    // Group by month for last 12 months
+                    for (let i = 11; i >= 0; i--) {
+                        const date = new Date(now);
+                        date.setMonth(date.getMonth() - i);
+                        const key = labels[date.getMonth()];
+                        if (!timeGroups[key]) timeGroups[key] = { scores: [], totals: 0 };
+                    }
+                    
+                    resultsData.forEach(result => {
+                        const resultDate = new Date(result.completed_at || result.started_at);
+                        const monthsDiff = (now.getFullYear() - resultDate.getFullYear()) * 12 + (now.getMonth() - resultDate.getMonth());
+                        if (monthsDiff >= 0 && monthsDiff < 12) {
+                            const key = labels[resultDate.getMonth()];
+                            if (timeGroups[key]) {
+                                const score = result.score || 0;
+                                const total = result.total || result.total_questions || 0;
+                                if (total > 0) {
+                                    timeGroups[key].scores.push((score / total) * 100);
+                                    timeGroups[key].totals += total;
+                                }
+                            }
+                        }
+                    });
+                    break;
+            }
+            
+            // Calculate averages for each time period
+            scoreData = labels.map(label => {
+                const group = timeGroups[label];
+                if (!group || group.scores.length === 0) return 0;
+                return Math.round(group.scores.reduce((sum, score) => sum + score, 0) / group.scores.length);
+            });
+            
+            qcmData = labels.map(label => {
+                const group = timeGroups[label];
+                return group ? group.totals : 0;
+            });
+
+            timelineChart.data.labels = labels;
+            timelineChart.data.datasets[0].data = scoreData;
+            timelineChart.data.datasets[1].data = qcmData;
+            timelineChart.update('active');
+        }
+
+        // Enhanced loadDashboardData with chart updates
+        async function loadDashboardDataWithCharts() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Fetch real user progress data
+                const [progressRes, modulesRes, resultsRes] = await Promise.all([
+                    fetch('http://localhost:8001/api/progress/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:8001/api/modules/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:8001/api/results/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (!progressRes.ok || !modulesRes.ok || !resultsRes.ok) {
+                    throw new Error('Erreur lors du chargement des données');
+                }
+
+                const progressData = await progressRes.json();
+                const modulesData = await modulesRes.json();
+                const resultsData = await resultsRes.json();
+
+                // Store results data globally for timeline chart
+                window.dashboardResultsData = resultsData;
+
+                // Update dashboard with real data
+                updateDashboardStats(progressData, modulesData, resultsData);
+                updateProgressCharts(progressData, resultsData);
+                updateRecentActivity(resultsData, modulesData);
+                
+                // Update Chart.js charts with real data
+                updateChartsWithRealData(progressData, modulesData, resultsData);
+
+            } catch (error) {
+                console.error('Erreur chargement dashboard:', error);
+                // Fallback to demo data if API fails
+                loadDemoData();
+            }
+        }
+
+        // Update Chart.js charts with real backend data
+        function updateChartsWithRealData(progressData, modulesData, resultsData) {
+            // Update performance radar chart (per-module success rates)
+            if (performanceChart) {
+                let labels = [];
+                let values = [];
+
+                if (Array.isArray(progressData.modules) && progressData.modules.length) {
+                    // Afficher TOUS les modules où l'utilisateur a répondu à des QCM (pas de limite à 6)
+                    const modulePerformance = progressData.modules
+                        .filter(m => ((m.correct_count ?? 0) + (m.wrong_count ?? 0)) > 0)
+                        .sort((a, b) => {
+                            // Trier par taux de réussite décroissant pour un meilleur affichage
+                            const aRate = a.success_rate ?? ((a.correct_count ?? 0) / Math.max(1, (a.correct_count ?? 0) + (a.wrong_count ?? 0)));
+                            const bRate = b.success_rate ?? ((b.correct_count ?? 0) / Math.max(1, (b.correct_count ?? 0) + (b.wrong_count ?? 0)));
+                            return bRate - aRate;
+                        });
+                    
+                    labels = modulePerformance.map(m => {
+                        // Prefer provided names, fallback to lookup by module_id in modulesData
+                        const name = m.module_name ?? m.name ?? (modulesData?.find(x => x.id === m.module_id)?.name) ?? 'Module';
+                        return name;
+                    });
+                    values = modulePerformance.map(m => {
+                        if (typeof m.success_rate === 'number') {
+                            const sr = m.success_rate;
+                            // Backend may return ratio [0,1] or percentage [0,100]
+                            const pct = sr <= 1 ? sr * 100 : sr;
+                            return Math.round(Math.max(0, Math.min(100, pct)));
+                        }
+                        const c = m.correct_count ?? 0; const w = m.wrong_count ?? 0; const tot = c + w;
+                        return tot > 0 ? Math.round((c / tot) * 100) : 0;
+                    });
+                } else if (Array.isArray(resultsData) && resultsData.length) {
+                    // Fallback: aggregate from recent results - afficher TOUS les modules
+                    const byModule = {};
+                    resultsData.forEach(r => {
+                        const name = r.module_name || r.module || 'Module';
+                        const t = (typeof r.total === 'number') ? r.total : (typeof r.total_questions === 'number' ? r.total_questions : 0);
+                        const s = (typeof r.score === 'number') ? r.score : 0;
+                        if (!byModule[name]) byModule[name] = { total: 0, score: 0 };
+                        byModule[name].total += t;
+                        byModule[name].score += s;
+                    });
+                    // Trier par performance décroissante et afficher tous les modules
+                    const entries = Object.entries(byModule)
+                        .filter(([, v]) => v.total > 0)
+                        .sort(([, a], [, b]) => (b.score / b.total) - (a.score / a.total));
+                    labels = entries.map(([name]) => name);
+                    values = entries.map(([, v]) => v.total > 0 ? Math.round((v.score / v.total) * 100) : 0);
+                }
+
+                if (labels.length) {
+                    performanceChart.data.labels = labels;
+                    performanceChart.data.datasets[0].data = values;
+                    performanceChart.update();
+                }
+            }
+
+            // Update weekly activity chart (sum of answered questions per day over last 7 days)
+            if (weeklyChart) {
+                const weeklyActivity = new Array(7).fill(0);
+                const today = new Date();
+                (Array.isArray(resultsData) ? resultsData : []).forEach(result => {
+                    const when = result.completed_at || result.started_at;
+                    if (!when) return;
+                    const d = new Date(when);
+                    const daysDiff = Math.floor((today - d) / (1000 * 60 * 60 * 24));
+                    if (daysDiff >= 0 && daysDiff < 7) {
+                        const t = (typeof result.total === 'number') ? result.total : (typeof result.total_questions === 'number' ? result.total_questions : 0);
+                        weeklyActivity[6 - daysDiff] += t;
+                    }
+                });
+                weeklyChart.data.datasets[0].data = weeklyActivity;
+                weeklyChart.update();
+            }
+
+            // Update progress doughnut chart (correct/incorrect/unanswered)
+            if (progressChart) {
+                let correct = progressData.overall?.correct_count ?? progressData.overall?.correct_sum;
+                let wrong = progressData.overall?.wrong_count ?? progressData.overall?.wrong_sum;
+                if (typeof correct !== 'number' || typeof wrong !== 'number') {
+                    // Fallback from results
+                    const tot = (Array.isArray(resultsData) ? resultsData : []).reduce((acc, r) => {
+                        const t = (typeof r.total === 'number') ? r.total : (typeof r.total_questions === 'number' ? r.total_questions : 0);
+                        const s = (typeof r.score === 'number') ? r.score : 0;
+                        acc.correct += s; acc.total += t; return acc;
+                    }, { correct: 0, total: 0 });
+                    correct = tot.correct;
+                    wrong = Math.max(0, tot.total - tot.correct);
+                }
+                const totalAns = correct + wrong;
+                const unanswered = 0; // we don't track unanswered at session level; avoid fake data
+                progressChart.data.datasets[0].data = [correct, wrong, unanswered];
+                progressChart.update();
+            }
+
+            // Animate counters
+            setTimeout(() => {
+                const totalQcms = modulesData.reduce((sum, module) => sum + (module.qcm_count || 0), 0);
+                let totalAnswered = progressData.overall?.total_solved;
+                if (typeof totalAnswered !== 'number') {
+                    totalAnswered = (Array.isArray(resultsData) ? resultsData : []).reduce((sum, r) => {
+                        const t = (typeof r.total === 'number') ? r.total : (typeof r.total_questions === 'number' ? r.total_questions : 0);
+                        return sum + t;
+                    }, 0);
+                }
+                let successRate = progressData.overall?.success_rate;
+                if (typeof successRate !== 'number') {
+                    const c = progressData.overall?.correct_count ?? progressData.overall?.correct_sum ?? 0;
+                    const w = progressData.overall?.wrong_count ?? progressData.overall?.wrong_sum ?? 0;
+                    const tot = c + w;
+                    successRate = tot > 0 ? Math.round((c / tot) * 100) : 0;
+                }
+                
+                const totalCounter = document.querySelector('#stat-total .counter');
+                const answeredCounter = document.querySelector('#stat-answered .counter');
+                const successCounter = document.querySelector('#stat-success .counter');
+                
+                if (totalCounter) animateCounter(totalCounter, totalQcms);
+                if (answeredCounter) animateCounter(answeredCounter, totalAnswered);
+                if (successCounter) animateCounter(successCounter, Math.round(successRate));
+                
+                // Update success bar
+                const successBar = document.getElementById('success-bar');
+                if (successBar) {
+                    setTimeout(() => {
+                        successBar.style.width = `${successRate}%`;
+                    }, 500);
+                }
+            }, 1000);
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i data-feather="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info'}" class="h-5 w-5 text-${type === 'success' ? 'green' : type === 'error' ? 'red' : 'blue'}-500"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">${message}</p>
+                    </div>
+                    <div class="ml-auto pl-3">
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                            <i data-feather="x" class="h-4 w-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            feather.replace();
+            
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+        }
+
+        // Loading state management
+        function setLoadingState(element, loading = true) {
+            if (loading) {
+                element.disabled = true;
+                const originalText = element.textContent;
+                element.dataset.originalText = originalText;
+                element.innerHTML = `<span class="loading-spinner"></span> Chargement...`;
+            } else {
+                element.disabled = false;
+                element.textContent = element.dataset.originalText || 'Continuer';
+            }
+        }
+
+        // Add ripple effect to buttons
+        function addRippleEffect() {
+            document.querySelectorAll('.btn-primary, .ripple').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple-effect');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => ripple.remove(), 600);
+                });
+            });
+        }
+
+        // Add tooltips to stat cards
+        function addTooltips() {
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                const tooltips = [
+                    'Nombre total de QCM disponibles dans votre niveau d\'études',
+                    'Nombre de QCM auxquels vous avez répondu',
+                    'Pourcentage de bonnes réponses sur l\'ensemble de vos sessions',
+                    'Temps total passé à étudier sur la plateforme'
+                ];
+                
+                if (tooltips[index]) {
+                    card.classList.add('tooltip');
+                    card.setAttribute('data-tooltip', tooltips[index]);
+                }
+            });
+        }
+
+        // Smooth scroll to sections
+        function smoothScrollTo(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+
+        // Enhanced chart interactions
+        function addChartInteractions() {
+            // Add click handlers to chart containers for full-screen view
+            document.querySelectorAll('.chart-container').forEach(container => {
+                const canvas = container.querySelector('canvas');
+                if (canvas) {
+                    canvas.style.cursor = 'pointer';
+                    canvas.addEventListener('click', function() {
+                        // Could implement modal view for charts
+                        showNotification('Cliquez et glissez pour interagir avec le graphique', 'info', 2000);
+                    });
+                }
+            });
+        }
+
+        // Keyboard shortcuts
+        function addKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Alt + D for dashboard
+                if (e.altKey && e.key === 'd') {
+                    e.preventDefault();
+                    window.location.href = 'index.html';
+                }
+                
+                // Alt + E for exploration
+                if (e.altKey && e.key === 'e') {
+                    e.preventDefault();
+                    window.location.href = 'exploration.html';
+                }
+                
+                // Alt + T for dark mode toggle
+                if (e.altKey && e.key === 't') {
+                    e.preventDefault();
+                    toggleDarkMode();
+                }
+            });
+        }
+
+        // Performance monitoring
+        function trackPerformance() {
+            if ('performance' in window) {
+                window.addEventListener('load', function() {
+                    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                    if (loadTime > 3000) {
+                        console.warn('Page load time is slow:', loadTime + 'ms');
+                    }
+                });
+            }
+        }
+
+        // Fonction de test pour créer un token temporaire (à supprimer en production)
+        function createTestToken() {
+            const testPayload = {
+                username: 'etudiant_test',
+                email: 'etudiant@test.com',
+                role: '5A',
+                firstName: 'Étudiant',
+                lastName: 'Test',
+                iat: Math.floor(Date.now() / 1000)
+            };
+            
+            // Créer un faux JWT (juste pour les tests)
+            const header = btoa(JSON.stringify({typ: 'JWT', alg: 'HS256'}));
+            const payload = btoa(JSON.stringify(testPayload));
+            const signature = 'test_signature';
+            
+            return `${header}.${payload}.${signature}`;
+        }
+
+        // Initialize dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize dark mode and icons first
+            initializeDarkMode();
+            feather.replace();
+            
+            // Créer un token de test si aucun token n'existe (pour les tests)
+            if (!localStorage.getItem('token')) {
+                localStorage.setItem('token', createTestToken());
+                console.log('Token de test créé pour les démonstrations');
+            }
+            
+            // Test de débogage pour le modal de profil
+            setTimeout(() => {
+                console.log('Testing modal elements...');
+                const modal = document.getElementById('userProfileModal');
+                const profileTab = document.getElementById('profileTabContent');
+                const passwordTab = document.getElementById('passwordTabContent');
+                
+                console.log('Modal elements check:', {
+                    modal: !!modal,
+                    profileTab: !!profileTab,
+                    passwordTab: !!passwordTab,
+                    profileTabVisible: profileTab && profileTab.style.display !== 'none',
+                    passwordTabVisible: passwordTab && passwordTab.style.display !== 'none'
+                });
+                
+                // Ajouter un bouton de test temporaire
+                const testBtn = document.createElement('button');
+                testBtn.textContent = 'Test Modal Profil';
+                testBtn.className = 'fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded z-50';
+                testBtn.onclick = () => {
+                    console.log('Test button clicked');
+                    showUserProfile();
+                };
+                document.body.appendChild(testBtn);
+                
+                console.log('Test button added to page');
+            }, 1000);
+            
+            // Initialize charts first
+            setTimeout(() => {
+                initializeCharts();
+                loadDashboardDataWithCharts();
+            }, 100);
+            
+            // Add interactive elements
+            setTimeout(() => {
+                addRippleEffect();
+                addTooltips();
+                addChartInteractions();
+                addKeyboardShortcuts();
+                trackPerformance();
+            }, 500);
+            
+            // Also call the original function for backward compatibility
+            loadDashboardData();
+            
+            // Show welcome notification for new users
+            const isFirstVisit = !localStorage.getItem('hasVisited');
+            if (isFirstVisit) {
+                setTimeout(() => {
+                    showNotification('Bienvenue sur ResicoQCM ! Explorez votre tableau de bord personnalisé.', 'success', 5000);
+                    localStorage.setItem('hasVisited', 'true');
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

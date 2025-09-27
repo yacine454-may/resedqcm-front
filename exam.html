@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Mode - ResicoQCM</title>
+  <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+    /* Light background (full page) */
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eef2ff 100%);
+    }
+    
+    .gradient-bg {
+      background: var(--primary-gradient);
+    }
+    
+    .gradient-secondary {
+      background: var(--secondary-gradient);
+    }
+    
+    .gradient-success {
+      background: var(--success-gradient);
+    }
+    
+    .gradient-warning {
+      background: var(--warning-gradient);
+    }
+    
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+    
+    .modern-card {
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border-radius: 20px;
+      box-shadow: 20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .modern-card:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 25px 25px 70px #d0d0d0, -25px -25px 70px #ffffff;
+    }
+    
+    .floating-animation {
+      animation: floating 3s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .pulse-glow {
+      animation: pulse-glow 2s infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8); }
+    }
+    
+    .slide-in-left {
+      animation: slideInLeft 0.6s ease-out;
+    }
+    
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .slide-in-right {
+      animation: slideInRight 0.6s ease-out;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .fade-in-up {
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .neon-button {
+      position: relative;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 15px;
+      padding: 12px 24px;
+      color: white;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .neon-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .neon-button:hover::before {
+      left: 100%;
+    }
+    
+    .neon-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .text-gradient {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .choice-button {
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      background: white;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .choice-button:hover {
+      border-color: #6366f1;
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+    
+    .choice-button.selected {
+      border-color: #6366f1;
+      background: #eef2ff;
+      color: #6366f1;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #6366f1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Dark mode styles */
+    .dark {
+      background: linear-gradient(135deg, #0b1220 0%, #0f1b33 50%, #0a1f3a 100%) !important;
+      color: #e5e7eb;
+    }
+    
+    .dark .glass-card {
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid rgba(75, 85, 99, 0.3);
+    }
+    
+    .dark .modern-card {
+      background: linear-gradient(145deg, #374151, #1f2937);
+      box-shadow: 20px 20px 60px #111827, -20px -20px 60px #4b5563;
+    }
+    
+    .dark .choice-button {
+      background: #374151;
+      border-color: #4b5563;
+      color: #e5e7eb;
+    }
+    
+    .dark .choice-button:hover {
+      border-color: #6366f1;
+      background: #4b5563;
+    }
+    
+    .dark .choice-button.selected {
+      border-color: #6366f1;
+      background: #312e81;
+      color: #a5b4fc;
+    }
+    
+    .timer-display {
+      background: linear-gradient(145deg, #ff6b6b, #ee5a24);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 15px;
+      font-weight: bold;
+      font-size: 1.2rem;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+      animation: timer-pulse 1s infinite;
+    }
+    
+    @keyframes timer-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .question-card {
+      background: linear-gradient(145deg, #ffffff, #f8f9ff);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .choice-button {
+      background: linear-gradient(145deg, #ffffff, #f5f7fa);
+      border: 2px solid #e2e8f0;
+      border-radius: 15px;
+      padding: 16px 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .choice-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+      border-color: #667eea;
+    }
+    
+    .choice-button.selected {
+      background: linear-gradient(145deg, #667eea, #764ba2);
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .progress-bar {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 6px;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    
+    .exam-setup-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+    }
+    /* Dark variants for cards and controls */
+    .dark .exam-setup-card {
+      background: rgba(31, 41, 55, 0.9);
+      border-color: rgba(75, 85, 99, 0.4);
+    }
+    .dark .question-card {
+      background: linear-gradient(145deg, #374151, #1f2937);
+      border-color: rgba(75, 85, 99, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .dark select,
+    .dark .border-gray-200 {
+      background-color: #1f2937;
+      color: #e5e7eb;
+      border-color: #374151 !important;
+    }
+  </style>
+</head>
+<body class="font-sans min-h-screen" id="body">
+  <!-- Nav -->
+  <nav class="glass-card sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <i data-feather="book-open" class="h-6 w-6 text-indigo-600"></i>
+            <span class="ml-2 text-xl font-bold text-gray-900">ResicoQCM</span>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+            <a href="exploration.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Exploration</a>
+            <a href="revision.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Révision</a>
+            <a href="exam.html" class="border-indigo-500 text-indigo-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examen</a>
+          </div>
+        </div>
+        <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+          <!-- Dark Mode Toggle -->
+          <button onclick="toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
+            <i id="darkModeIcon" data-feather="moon" class="h-5 w-5"></i>
+          </button>
+          
+          <!-- User Profile Dropdown -->
+          <div class="relative" id="userProfileDropdown">
+            <button onclick="toggleProfileMenu()" class="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                <span class="text-white text-sm font-medium" id="userInitials">EM</span>
+              </div>
+              <span class="text-gray-700 font-medium" id="userName">Étudiant en Médecine</span>
+              <i data-feather="chevron-down" class="h-4 w-4 text-gray-500"></i>
+            </button>
+            
+            <!-- Dropdown menu -->
+            <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+              <a href="#" onclick="showUserProfile()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+              <div class="border-t border-gray-100"></div>
+              <a href="login.html" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile menu -->
+    <div class="sm:hidden hidden" id="mobile-menu">
+      <div class="pt-2 pb-3 space-y-1">
+        <a href="index.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
+        <a href="exploration.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Exploration</a>
+        <a href="revision.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Révision</a>
+        <a href="exam.html" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Examen</a>
+        <div class="mt-4 p-4">
+          <div class="flex items-center space-x-2 p-2 text-gray-700">
+            <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center">
+              <span class="text-white text-sm font-medium">EM</span>
+            </div>
+            <span class="text-sm font-medium">Étudiant en Médecine</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-12 text-center slide-in-left">
+      <h1 class="text-5xl font-bold text-gradient mb-4 floating-animation">Exam Mode</h1>
+      <p class="text-xl text-gray-600 max-w-2xl mx-auto">Test your knowledge with timed examinations. Answer all questions within the time limit and receive detailed feedback at the end.</p>
+      <div class="mt-6 flex justify-center">
+        <div class="w-24 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- Exam setup -->
+    <div class="exam-setup-card p-8 mb-12 fade-in-up">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Configure Your Exam</h2>
+        <p class="text-gray-600">Choose your module, number of questions, and time limit</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Module</label>
+          <select id="exam-module" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+            <option value="">Select a module...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Questions</label>
+          <select id="exam-count" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+            <option value="20">20 questions</option>
+            <option value="30">30 questions</option>
+            <option value="50" selected>50 questions</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+          <select id="exam-duration" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60" selected>60 minutes</option>
+          </select>
+        </div>
+        <div class="flex flex-col items-center gap-4">
+          <button id="start-exam" class="neon-button w-full">
+            <i data-feather="play" class="mr-2 h-4 w-4"></i>
+            Start Exam
+          </button>
+          <div class="timer-display">
+            <i data-feather="clock" class="inline mr-2 h-5 w-5"></i>
+            <span id="timer">00:00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam card -->
+    <div id="exam-card" class="question-card p-8 mb-8 hidden slide-in-right">
+      <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+          <div id="exam-progress" class="text-lg font-semibold text-gradient">0 / 0</div>
+          <div class="w-48 bg-gray-200 rounded-full h-2">
+            <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+          </div>
+        </div>
+        <button id="submit-exam" class="neon-button">
+          <i data-feather="check-circle" class="mr-2 h-4 w-4"></i>
+          Submit Exam
+        </button>
+      </div>
+      <div class="mb-8">
+        <h2 id="exam-question" class="text-2xl font-bold text-gray-900 mb-6 leading-relaxed">Question</h2>
+        <div id="exam-choices" class="space-y-4"></div>
+      </div>
+      <div class="flex items-center justify-between">
+        <button id="exam-prev" class="inline-flex items-center px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:border-indigo-500 hover:text-indigo-600 transition-all">
+          <i data-feather="chevron-left" class="mr-2 h-4 w-4"></i>
+          Previous
+        </button>
+        <div class="text-center">
+          <p class="text-sm text-gray-500 mb-1">Question Navigation</p>
+          <div class="flex gap-1" id="question-dots"></div>
+        </div>
+        <button id="exam-next" class="inline-flex items-center px-6 py-3 rounded-xl text-white gradient-success hover:opacity-90 transition-all">
+          Next
+          <i data-feather="chevron-right" class="ml-2 h-4 w-4"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Result summary -->
+    <div id="exam-summary" class="modern-card p-8 hidden fade-in-up"></div>
+  
+  <!-- Exam History Section -->
+  <div class="mt-12 fade-in-up">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-gradient mb-2">Historique des Examens</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-300">Consultez vos performances passées</p>
+    </div>
+    <div class="modern-card overflow-hidden">
+      <div id="examHistoryContainer" class="divide-y divide-gray-200 dark:divide-gray-600">
+        <!-- Rempli dynamiquement -->
+      </div>
+      <div class="px-8 py-6 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 text-center">
+        <button type="button" class="neon-button" onclick="loadMoreExamHistory()">
+          <i data-feather="clock" class="mr-2 h-4 w-4"></i>
+          Charger plus d'examens
+        </button>
+      </div>
+    </div>
+  </div>
+  </main>
+
+  <!-- User Profile Modal -->
+  <div id="userProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] flex">
+      <!-- Sidebar Navigation -->
+      <div class="w-64 bg-gray-50 rounded-l-lg border-r">
+        <div class="p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800">Paramètres</h3>
+        </div>
+        <nav class="p-2">
+          <button onclick="showProfileTab()" id="profileTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md mb-1 bg-gray-100">
+            <i data-feather="user" class="w-4 h-4 mr-3"></i>
+            Profil
+          </button>
+          <button onclick="showPasswordTab()" id="passwordTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md">
+            <i data-feather="lock" class="w-4 h-4 mr-3"></i>
+            Mot de passe
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-xl font-semibold text-gray-800" id="modalTitle">Profil</h2>
+          <button onclick="closeUserProfileModal()" class="text-gray-500 hover:text-gray-700">
+            <i data-feather="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <!-- Profile Tab Content -->
+        <div id="profileTabContent" class="flex-1 p-6 overflow-y-auto">
+          <div class="max-w-2xl">
+            <!-- Avatar Section -->
+            <div class="flex items-center mb-8">
+              <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mr-6">
+                <span class="text-white text-2xl font-bold" id="profileAvatarInitials">EM</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900" id="profileDisplayName">Étudiant en Médecine</h3>
+                <p class="text-sm text-gray-500">Membre depuis <span id="profileMemberSince">2024</span></p>
+              </div>
+            </div>
+            
+            <!-- Profile Form -->
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">First name:</label>
+                  <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                         id="profileFirstName" type="text" placeholder="Prénom">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Last name:</label>
+                  <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                         id="profileLastName" type="text" placeholder="Nom de famille">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="profileUsername" type="text" placeholder="Nom d'utilisateur">
+                <p class="text-xs text-gray-500 mt-1">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email address:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="profileEmail" type="email" placeholder="email@example.com">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Niveau d'étude:</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                        id="profileLevel">
+                  <option value="4A">4ème Année</option>
+                  <option value="5A">5ème Année</option>
+                  <option value="6A">6ème Année</option>
+                  <option value="RES">Résident</option>
+                </select>
+              </div>
+              
+              <div class="pt-4">
+                <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  Sauvegarder les modifications
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Password Tab Content -->
+        <div id="passwordTabContent" class="flex-1 p-6 overflow-y-auto hidden">
+          <div class="max-w-md">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Changer le mot de passe</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="currentPassword" type="password" placeholder="Mot de passe actuel">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="newPassword" type="password" placeholder="Nouveau mot de passe">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le nouveau mot de passe:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="confirmNewPassword" type="password" placeholder="Confirmer le nouveau mot de passe">
+              </div>
+              <div class="pt-4">
+                <button onclick="changePassword()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  Changer le mot de passe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8001/api';
+
+    // Profile header (aligné au dashboard)
+    function renderNavProfile() {
+      const userInitials = document.getElementById('userInitials');
+      const userName = document.getElementById('userName');
+      try {
+        const raw = localStorage.getItem('authUser');
+        const user = raw ? JSON.parse(raw) : null;
+        const name = user?.username || user?.email || 'Profil';
+        if (userName) userName.textContent = name;
+        if (userInitials && name) {
+          const init = name.split('@')[0].split(' ').map(s => s[0]).join('').slice(0,2).toUpperCase();
+          userInitials.textContent = init || 'EM';
+        }
+      } catch(e) {}
+    }
+
+    let questions = [];
+    let answers = new Map(); // qcmId -> selectedIndex
+    let idx = 0;
+    let resultId = null;
+    let currentModuleId = null;
+    let timerInterval = null;
+    let remainingSec = 0;
+
+    const el = {
+      module: document.getElementById('exam-module'),
+      count: document.getElementById('exam-count'),
+      duration: document.getElementById('exam-duration'),
+      start: document.getElementById('start-exam'),
+      timer: document.getElementById('timer'),
+      card: document.getElementById('exam-card'),
+      progress: document.getElementById('exam-progress'),
+      question: document.getElementById('exam-question'),
+      choices: document.getElementById('exam-choices'),
+      prev: document.getElementById('exam-prev'),
+      next: document.getElementById('exam-next'),
+      submit: document.getElementById('submit-exam'),
+      summary: document.getElementById('exam-summary'),
+    };
+
+    function headers() {
+      const token = localStorage.getItem('token');
+      if (!token) { window.location.href = 'login.html'; return {}; }
+      return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+    }
+
+    async function loadModules() {
+      const res = await fetch(`${API_BASE}/modules/my`, { headers: headers() });
+      const mods = await res.json();
+      el.module.innerHTML = '<option value="">Select a module...</option>';
+      (mods||[]).forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id; opt.textContent = `${m.name} (${m.level||''})`;
+        el.module.appendChild(opt);
+      });
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec/60).toString().padStart(2,'0');
+      const s = Math.floor(sec%60).toString().padStart(2,'0');
+      return `${m}:${s}`;
+    }
+
+    function startTimer(totalMinutes) {
+      remainingSec = totalMinutes*60;
+      el.timer.textContent = formatTime(remainingSec);
+      timerInterval = setInterval(() => {
+        remainingSec -= 1;
+        el.timer.textContent = formatTime(Math.max(remainingSec,0));
+        if (remainingSec <= 0) {
+          clearInterval(timerInterval);
+          finishExam();
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      el.progress.textContent = `${idx+1} / ${questions.length}`;
+      
+      // Update progress bar
+      const progressBar = document.getElementById('progress-bar');
+      if (progressBar) {
+        const percentage = ((idx + 1) / questions.length) * 100;
+        progressBar.style.width = `${percentage}%`;
+      }
+      
+      // Update question dots navigation
+      updateQuestionDots();
+      
+      const q = questions[idx];
+      el.question.textContent = q.question;
+      el.choices.innerHTML = '';
+      
+      q.choices.forEach((t, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'choice-button w-full text-left';
+        btn.textContent = t;
+        
+        if (answers.get(q.id) === i) {
+          btn.classList.add('selected');
+        }
+        
+        btn.addEventListener('click', async () => {
+          // store selection locally and post answer immediately (no feedback)
+          answers.set(q.id, i);
+          Array.from(el.choices.children).forEach(c => c.classList.remove('selected'));
+          btn.classList.add('selected');
+          
+          // Add selection animation
+          btn.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            btn.style.transform = '';
+          }, 150);
+          
+          try {
+            await fetch(`${API_BASE}/results/answer`, {
+              method: 'POST', headers: headers(),
+              body: JSON.stringify({ resultId, qcmId: q.id, selectedIndex: i })
+            });
+          } catch(e){}
+        });
+        el.choices.appendChild(btn);
+      });
+    }
+    
+    function updateQuestionDots() {
+      const dotsContainer = document.getElementById('question-dots');
+      if (!dotsContainer) return;
+      
+      dotsContainer.innerHTML = '';
+      questions.forEach((q, i) => {
+        const dot = document.createElement('div');
+        dot.className = `w-3 h-3 rounded-full cursor-pointer transition-all ${
+          i === idx ? 'bg-indigo-600 scale-125' : 
+          answers.has(q.id) ? 'bg-green-500' : 'bg-gray-300'
+        }`;
+        dot.addEventListener('click', () => {
+          idx = i;
+          renderQuestion();
+        });
+        dotsContainer.appendChild(dot);
+      });
+    }
+
+    async function startExam() {
+      const moduleId = el.module.value;
+      if (!moduleId) { alert('Please select a module'); return; }
+      const count = parseInt(el.count.value,10) || 50;
+      const mins = parseInt(el.duration.value,10) || 60;
+      currentModuleId = moduleId;
+
+      // Start result in exam mode
+      const r = await fetch(`${API_BASE}/results/start`, {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({ moduleId, mode: 'exam' })
+      });
+      const data = await r.json();
+      if (!r.ok) { alert(data.message || 'Could not start exam'); return; }
+      resultId = data.resultId;
+
+      // Load fixed set of questions
+      const qRes = await fetch(`${API_BASE}/qcm/sb?moduleId=${encodeURIComponent(moduleId)}&limit=${count}&offset=0`, { headers: headers() });
+      questions = await qRes.json();
+      if (!Array.isArray(questions) || questions.length === 0) { alert('No questions available for this module.'); return; }
+
+      // Show card and render
+      el.card.classList.remove('hidden');
+      el.summary.classList.add('hidden');
+      idx = 0; answers = new Map();
+      renderQuestion();
+      startTimer(mins);
+    }
+
+    async function finishExam() {
+      // finalize result
+      try {
+        const f = await fetch(`${API_BASE}/results/finish`, {
+          method: 'POST', headers: headers(),
+          body: JSON.stringify({ resultId })
+        });
+        const r = await f.json();
+        const pct = r.result.total > 0 ? Math.round((r.result.score*100)/r.result.total) : 0;
+        
+        // Determine grade and color
+        let gradeColor, gradeText, gradeIcon;
+        if (pct >= 90) {
+          gradeColor = 'text-green-600';
+          gradeText = 'Excellent!';
+          gradeIcon = 'award';
+        } else if (pct >= 80) {
+          gradeColor = 'text-blue-600';
+          gradeText = 'Very Good!';
+          gradeIcon = 'thumbs-up';
+        } else if (pct >= 70) {
+          gradeColor = 'text-yellow-600';
+          gradeText = 'Good';
+          gradeIcon = 'check-circle';
+        } else if (pct >= 60) {
+          gradeColor = 'text-orange-600';
+          gradeText = 'Fair';
+          gradeIcon = 'alert-circle';
+        } else {
+          gradeColor = 'text-red-600';
+          gradeText = 'Needs Improvement';
+          gradeIcon = 'x-circle';
+        }
+        
+        el.summary.innerHTML = `
+          <div class="text-center mb-8">
+            <div class="w-24 h-24 mx-auto mb-4 rounded-full gradient-bg flex items-center justify-center pulse-glow">
+              <i data-feather="${gradeIcon}" class="h-12 w-12 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gradient mb-2">Exam Completed!</h2>
+            <p class="text-xl ${gradeColor} font-semibold">${gradeText}</p>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
+              <div class="text-3xl font-bold text-gradient mb-2">${r.result.score}</div>
+              <div class="text-gray-600">Correct Answers</div>
+            </div>
+            <div class="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl">
+              <div class="text-3xl font-bold text-gradient mb-2">${r.result.total}</div>
+              <div class="text-gray-600">Total Questions</div>
+            </div>
+            <div class="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
+              <div class="text-3xl font-bold text-gradient mb-2">${pct}%</div>
+              <div class="text-gray-600">Success Rate</div>
+            </div>
+          </div>
+          
+          <div class="text-center">
+            <a href="index.html" class="neon-button mr-4">
+              <i data-feather="home" class="mr-2 h-4 w-4"></i>
+              Back to Dashboard
+            </a>
+            <a href="revision.html" class="inline-flex items-center px-6 py-3 border-2 border-indigo-500 rounded-xl text-indigo-600 hover:bg-indigo-50 transition-all">
+              <i data-feather="refresh-cw" class="mr-2 h-4 w-4"></i>
+              Review Mistakes
+            </a>
+          </div>`;
+        
+        el.card.classList.add('hidden');
+        el.summary.classList.remove('hidden');
+        if (timerInterval) clearInterval(timerInterval);
+        feather.replace();
+      } catch(e) { console.error('finishExam', e); }
+    }
+        
+    function toggleDarkMode() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (isDark) {
+                body.classList.remove('dark');
+                if (icon) icon.setAttribute('data-feather', 'moon');
+                localStorage.setItem('darkMode', 'false');
+            } else {
+                body.classList.add('dark');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+                localStorage.setItem('darkMode', 'true');
+            }
+            
+            feather.replace();
+        }
+        
+        function initializeDarkMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (darkMode === 'true') {
+                document.body.classList.add('dark');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+            } else {
+                document.body.classList.remove('dark');
+                if (icon) icon.setAttribute('data-feather', 'moon');
+            }
+            feather.replace();
+        }
+        
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+        
+        async function showUserProfile() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Décoder le token JWT pour obtenir les informations utilisateur
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const profile = {
+                    username: payload.username || payload.email || 'Utilisateur',
+                    email: payload.email || 'Non spécifié',
+                    level: payload.role || 'Non spécifié',
+                    subscription_type: 'Standard',
+                    created_at: new Date().toISOString()
+                };
+                
+                // Séparer le nom complet en prénom et nom si possible
+                const fullName = profile.username.split(' ');
+                const firstName = fullName[0] || '';
+                const lastName = fullName.slice(1).join(' ') || '';
+                
+                // Remplir les champs du profil
+                document.getElementById('profileFirstName').value = firstName;
+                document.getElementById('profileLastName').value = lastName;
+                document.getElementById('profileUsername').value = profile.username;
+                document.getElementById('profileEmail').value = profile.email;
+                document.getElementById('profileLevel').value = profile.level;
+                
+                // Mettre à jour l'avatar et les informations d'affichage
+                const initials = profile.username.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                document.getElementById('profileDisplayName').textContent = profile.username;
+                document.getElementById('profileMemberSince').textContent = new Date(profile.created_at).getFullYear();
+                
+                // Afficher le modal et s'assurer que l'onglet profil est actif
+                showProfileTab();
+                document.getElementById('userProfileModal').classList.remove('hidden');
+                document.getElementById('profileMenu').classList.add('hidden');
+                feather.replace();
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement du profil');
+            }
+        }
+
+        function closeUserProfileModal() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        function showProfileTab() {
+            // Afficher le contenu du profil et masquer celui du mot de passe
+            document.getElementById('profileTabContent').classList.remove('hidden');
+            document.getElementById('passwordTabContent').classList.add('hidden');
+            
+            // Mettre à jour les boutons de navigation
+            document.getElementById('profileTabBtn').classList.add('bg-gray-100');
+            document.getElementById('passwordTabBtn').classList.remove('bg-gray-100');
+            
+            // Mettre à jour le titre
+            document.getElementById('modalTitle').textContent = 'Profil';
+        }
+
+        function showPasswordTab() {
+            // Afficher le contenu du mot de passe et masquer celui du profil
+            document.getElementById('profileTabContent').classList.add('hidden');
+            document.getElementById('passwordTabContent').classList.remove('hidden');
+            
+            // Mettre à jour les boutons de navigation
+            document.getElementById('profileTabBtn').classList.remove('bg-gray-100');
+            document.getElementById('passwordTabBtn').classList.add('bg-gray-100');
+            
+            // Mettre à jour le titre
+            document.getElementById('modalTitle').textContent = 'Changer le mot de passe';
+            
+            // Nettoyer les champs de mot de passe
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        async function saveProfile() {
+            try {
+                const firstName = document.getElementById('profileFirstName').value;
+                const lastName = document.getElementById('profileLastName').value;
+                const username = document.getElementById('profileUsername').value;
+                const email = document.getElementById('profileEmail').value;
+                const level = document.getElementById('profileLevel').value;
+
+                if (!username || !email) {
+                    alert('Le nom d\'utilisateur et l\'email sont requis');
+                    return;
+                }
+
+                // Pour l'instant, on simule la sauvegarde
+                // Dans un vrai projet, on ferait un appel API ici
+                alert('Profil sauvegardé avec succès ! (Fonctionnalité de sauvegarde à implémenter côté backend)');
+                
+                // Mettre à jour l'affichage
+                const fullName = `${firstName} ${lastName}`.trim() || username;
+                document.getElementById('profileDisplayName').textContent = fullName;
+                
+                // Mettre à jour les initiales
+                const initials = fullName.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                
+                // Mettre à jour aussi l'avatar dans la navigation
+                const userInitialsEl = document.getElementById('userInitials');
+                const userNameEl = document.getElementById('userName');
+                if (userInitialsEl) userInitialsEl.textContent = initials;
+                if (userNameEl) userNameEl.textContent = fullName;
+                
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde du profil');
+            }
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('Les nouveaux mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour changer votre mot de passe');
+                    return;
+                }
+
+                // Pour l'instant, on simule le changement de mot de passe
+                // Dans un vrai projet, on ferait un appel API ici
+                /*
+                const response = await fetch('http://localhost:8001/api/user/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        currentPassword: current,
+                        newPassword: newPass
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Mot de passe changé avec succès !');
+                } else {
+                    const error = await response.json();
+                    alert('Erreur: ' + (error.message || 'Impossible de changer le mot de passe'));
+                }
+                */
+                
+                alert('Mot de passe changé avec succès ! (Fonctionnalité à implémenter côté backend)');
+                
+                // Nettoyer les champs
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                
+            } catch (error) {
+                console.error('Erreur lors du changement de mot de passe:', error);
+                alert('Erreur lors du changement de mot de passe');
+            }
+        }
+
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        }
+        
+        async function renderNavProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                // Décoder le token JWT pour obtenir les informations utilisateur
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userInitials = payload.username ? payload.username.substring(0, 2).toUpperCase() : 'EM';
+                
+                // Update profile display
+                const userInitialsEl = document.getElementById('userInitials');
+                const userNameEl = document.getElementById('userName');
+                
+                if (userInitialsEl) userInitialsEl.textContent = userInitials;
+                if (userNameEl) userNameEl.textContent = payload.username || 'Étudiant en Médecine';
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                // Fallback display
+                const userInitialsEl = document.getElementById('userInitials');
+                const userNameEl = document.getElementById('userName');
+                
+                if (userInitialsEl) userInitialsEl.textContent = 'EM';
+                if (userNameEl) userNameEl.textContent = 'Étudiant en Médecine';
+            }
+        }
+
+        // Function to explain with AI - accessible globalement
+        window.explainWithAI = function(question, correctAnswer) {
+            try {
+                const decodedQuestion = decodeURIComponent(question);
+                const decodedAnswer = decodeURIComponent(correctAnswer);
+                
+                const prompt = `Peux-tu m'expliquer cette question de médecine en détail ?
+
+Question: ${decodedQuestion}
+
+Réponse correcte: ${decodedAnswer}
+
+Je voudrais une explication approfondie sur pourquoi cette réponse est correcte et les concepts médicaux impliqués. Merci !`;
+                
+                // URL ChatGPT corrigée
+                const chatGPTUrl = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+                window.open(chatGPTUrl, '_blank');
+            } catch (error) {
+                console.error('Erreur explainWithAI:', error);
+                // Fallback : ouvrir ChatGPT sans prompt
+                window.open('https://chatgpt.com/', '_blank');
+            }
+        }
+        
+        async function loadExamHistory() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                
+                const response = await fetch('http://localhost:8001/api/results/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Erreur lors du chargement');
+                
+                const results = await response.json();
+                displayExamHistory(results.filter(r => r.mode === 'exam' && r.completed_at));
+                
+            } catch (error) {
+                console.error('Erreur chargement historique:', error);
+                document.getElementById('examHistoryContainer').innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-500">Erreur lors du chargement de l'historique</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayExamHistory(exams) {
+            const container = document.getElementById('examHistoryContainer');
+            
+            if (!exams || exams.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-feather="file-text" class="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400 text-lg mb-2">Aucun examen terminé</p>
+                        <p class="text-gray-400 dark:text-gray-500 text-sm">Commencez votre premier examen pour voir l'historique</p>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            let html = '';
+            exams.slice(0, 10).forEach(exam => {
+                const score = exam.score || 0;
+                const total = exam.total || 0;
+                const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+                const date = new Date(exam.completed_at).toLocaleDateString('fr-FR', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                const time = new Date(exam.completed_at).toLocaleTimeString('fr-FR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                let badgeColor, icon;
+                if (percentage >= 90) {
+                    badgeColor = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                    icon = 'award';
+                } else if (percentage >= 80) {
+                    badgeColor = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                    icon = 'thumbs-up';
+                } else if (percentage >= 70) {
+                    badgeColor = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+                    icon = 'check-circle';
+                } else if (percentage >= 60) {
+                    badgeColor = 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+                    icon = 'alert-circle';
+                } else {
+                    badgeColor = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                    icon = 'x-circle';
+                }
+                
+                html += `
+                    <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-12 w-12 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
+                                    <i data-feather="${icon}" class="h-6 w-6 text-indigo-600 dark:text-indigo-400"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold text-gray-900 dark:text-gray-100">${exam.module_name || 'Examen'}</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 capitalize">${date} à ${time}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-500">Durée: ${Math.round((new Date(exam.completed_at) - new Date(exam.started_at)) / 60000)} minutes</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${badgeColor}">
+                                    ${score}/${total} (${percentage}%)
+                                </span>
+                                <div class="mt-2">
+                                    <button onclick="reviewExam('${exam.id}')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm font-medium">
+                                        Revoir les réponses
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            feather.replace();
+        }
+        
+        function loadMoreExamHistory() {
+            // This would load more exam history with pagination
+            alert('Fonctionnalité de pagination à implémenter');
+        }
+        
+        function reviewExam(examId) {
+            // This would show detailed exam review
+            alert(`Revoir l'examen ${examId} - Fonctionnalité à implémenter`);
+        }
+
+    // Fonction de test pour créer un token temporaire (à supprimer en production)
+    function createTestToken() {
+        const testPayload = {
+            username: 'etudiant_test',
+            email: 'etudiant@test.com',
+            role: '5A',
+            firstName: 'Étudiant',
+            lastName: 'Test',
+            iat: Math.floor(Date.now() / 1000)
+        };
+        
+        // Créer un faux JWT (juste pour les tests)
+        const header = btoa(JSON.stringify({typ: 'JWT', alg: 'HS256'}));
+        const payload = btoa(JSON.stringify(testPayload));
+        const signature = 'test_signature';
+        
+        return `${header}.${payload}.${signature}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Créer un token de test si aucun token n'existe (pour les tests)
+      if (!localStorage.getItem('token')) {
+          localStorage.setItem('token', createTestToken());
+          console.log('Token de test créé pour les démonstrations');
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token) { window.location.href = 'login.html'; return; }
+      
+      initializeDarkMode();
+      renderNavProfile();
+      await loadModules();
+      await loadExamHistory();
+      
+      el.start.addEventListener('click', startExam);
+      el.next.addEventListener('click', () => { if (idx < questions.length-1) { idx++; renderQuestion(); }});
+      el.prev.addEventListener('click', () => { if (idx > 0) { idx--; renderQuestion(); }});
+      el.submit.addEventListener('click', finishExam);
+
+      // Mobile menu toggle (aligné au dashboard)
+      const mobileBtn = document.querySelector('nav .sm\\:hidden button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+      }
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileDropdown = document.getElementById('userProfileDropdown');
+        const profileMenu = document.getElementById('profileMenu');
+        
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            profileMenu.classList.add('hidden');
+        }
+    });
+    
+    feather.replace();
+  </script>
+</body>
+</html>

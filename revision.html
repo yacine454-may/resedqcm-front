@@ -1,0 +1,2198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revision Mode - ResicoQCM</title>
+    <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="shared-styles.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+        }
+        /* Light background (full page) */
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #eef2ff 100%);
+        }
+        
+        .gradient-bg {
+            background: var(--primary-gradient);
+        }
+        
+        .gradient-secondary {
+            background: var(--secondary-gradient);
+        }
+        
+        .gradient-success {
+            background: var(--success-gradient);
+        }
+        
+        .gradient-warning {
+            background: var(--warning-gradient);
+        }
+        
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .modern-card {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 20px;
+            box-shadow: 20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .modern-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 30px 30px 80px #d0d0d0, -30px -30px 80px #ffffff;
+        }
+        
+        .floating-animation {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8); }
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        .neon-button {
+            position: relative;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .neon-button:focus-visible {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+        
+        .neon-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .neon-button:disabled:hover {
+            transform: none;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .neon-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .neon-button:hover::before {
+            left: 100%;
+        }
+        
+        .neon-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .morphism-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 800px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .modal-overlay.show .modal-content {
+            transform: scale(1) translateY(0);
+        }
+        /* Full-page dark background */
+        .dark {
+            background: linear-gradient(135deg, #0b1220 0%, #0f1b33 50%, #0a1f3a 100%) !important;
+            color: #e5e7eb;
+        }
+        .dark .glass-card {
+            background: rgba(31, 41, 55, 0.85);
+            border-color: rgba(75, 85, 99, 0.4);
+        }
+        .dark .modern-card,
+        .dark .morphism-card {
+            background: linear-gradient(145deg, #374151, #1f2937);
+            box-shadow: 20px 20px 60px #111827, -20px -20px 60px #4b5563;
+            border-color: rgba(75, 85, 99, 0.4);
+        }
+        .dark select,
+        .dark input,
+        .dark .border-gray-200 {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            border-color: #374151 !important;
+        }
+        .dark .divide-gray-200 { border-color: #334155; }
+        .dark .text-gray-600 { color: #94a3b8; }
+        .dark .text-gray-500 { color: #64748b; }
+    </style>
+</head>
+<body class="font-sans min-h-screen" id="body">
+    <!-- Navigation -->
+    <nav class="glass-card sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="book-open" class="h-6 w-6 text-indigo-600"></i>
+                        <span class="ml-2 text-xl font-bold text-gray-900">ResicoQCM</span>
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="index.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</a>
+                        <a href="exploration.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Exploration</a>
+                        <a href="revision.html" class="border-indigo-500 text-indigo-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Révision</a>
+                        <a href="exam.html" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Examen</a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
+                        <i id="darkModeIcon" data-feather="moon" class="h-5 w-5"></i>
+                    </button>
+                    
+                    <!-- User Profile Dropdown -->
+                    <div class="relative" id="userProfileDropdown">
+                        <button onclick="toggleProfileMenu()" class="flex items-center space-x-2 p-2 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md">
+                            <div class="h-8 w-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-medium">EM</span>
+                            </div>
+                            <i data-feather="chevron-down" class="h-4 w-4"></i>
+                        </button>
+                        
+                        <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="#" onclick="showUserProfile()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Paramètres</a>
+                            <div class="border-t border-gray-100"></div>
+                            <a href="login.html" onclick="logout()" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                        <i data-feather="menu"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1">
+                <a href="index.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Dashboard</a>
+                <a href="exploration.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Exploration</a>
+                <a href="revision.html" class="bg-indigo-50 border-indigo-500 text-indigo-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Révision</a>
+                <a href="exam.html" class="border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 block pl-3 pr-4 py-2 border-l-4 text-base font-medium">Examen</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- User Profile Modal -->
+  <div id="userProfileModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[80vh] flex">
+      <!-- Sidebar Navigation -->
+      <div class="w-64 bg-gray-50 rounded-l-lg border-r">
+        <div class="p-4 border-b">
+          <h3 class="text-lg font-semibold text-gray-800">Paramètres</h3>
+        </div>
+        <nav class="p-2">
+          <button onclick="showProfileTab()" id="profileTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md mb-1 bg-gray-100">
+            <i data-feather="user" class="w-4 h-4 mr-3"></i>
+            Profil
+          </button>
+          <button onclick="showPasswordTab()" id="passwordTabBtn" class="w-full flex items-center px-3 py-2 text-left text-gray-700 hover:bg-gray-100 rounded-md">
+            <i data-feather="lock" class="w-4 h-4 mr-3"></i>
+            Mot de passe
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-6 border-b">
+          <h2 class="text-xl font-semibold text-gray-800" id="modalTitle">Profil</h2>
+          <button onclick="closeUserProfileModal()" class="text-gray-500 hover:text-gray-700">
+            <i data-feather="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <!-- Profile Tab Content -->
+        <div id="profileTabContent" class="flex-1 p-6 overflow-y-auto">
+          <div class="max-w-2xl">
+            <!-- Avatar Section -->
+            <div class="flex items-center mb-8">
+              <div class="w-20 h-20 bg-indigo-500 rounded-full flex items-center justify-center mr-6">
+                <span class="text-white text-2xl font-bold" id="profileAvatarInitials">EM</span>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-gray-900" id="profileDisplayName">Étudiant en Médecine</h3>
+                <p class="text-sm text-gray-500">Membre depuis <span id="profileMemberSince">2024</span></p>
+              </div>
+            </div>
+            
+            <!-- Profile Form -->
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">First name:</label>
+                  <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                         id="profileFirstName" type="text" placeholder="Prénom">
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Last name:</label>
+                  <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                         id="profileLastName" type="text" placeholder="Nom de famille">
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Username:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="profileUsername" type="text" placeholder="Nom d'utilisateur">
+                <p class="text-xs text-gray-500 mt-1">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</p>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email address:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="profileEmail" type="email" placeholder="email@example.com">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Niveau d'étude:</label>
+                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                        id="profileLevel">
+                  <option value="4A">4ème Année</option>
+                  <option value="5A">5ème Année</option>
+                  <option value="6A">6ème Année</option>
+                  <option value="RES">Résident</option>
+                </select>
+              </div>
+              
+              <div class="pt-4">
+                <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  Sauvegarder les modifications
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Password Tab Content -->
+        <div id="passwordTabContent" class="flex-1 p-6 overflow-y-auto hidden">
+          <div class="max-w-md">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Changer le mot de passe</h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="currentPassword" type="password" placeholder="Mot de passe actuel">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nouveau mot de passe:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="newPassword" type="password" placeholder="Nouveau mot de passe">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Confirmer le nouveau mot de passe:</label>
+                <input class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
+                       id="confirmNewPassword" type="password" placeholder="Confirmer le nouveau mot de passe">
+              </div>
+              <div class="pt-4">
+                <button onclick="changePassword()" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                  Changer le mot de passe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+            <div class="flex justify-between items-center p-6 border-b">
+                <h3 class="text-xl font-semibold text-gray-800">Paramètres de Révision</h3>
+                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-gray-700">
+                    <i data-feather="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Difficulty Settings -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Niveau de difficulté</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="radio" name="difficulty" value="easy" class="mr-2" checked>
+                            <span class="text-sm">Facile - Questions de base</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="difficulty" value="medium" class="mr-2">
+                            <span class="text-sm">Moyen - Questions intermédiaires</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="difficulty" value="hard" class="mr-2">
+                            <span class="text-sm">Difficile - Questions avancées</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="difficulty" value="mixed" class="mr-2">
+                            <span class="text-sm">Mixte - Tous niveaux</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Questions per session -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Questions par session</label>
+                    <select id="questionsPerSession" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="10">10 questions</option>
+                        <option value="20" selected>20 questions</option>
+                        <option value="30">30 questions</option>
+                        <option value="50">50 questions</option>
+                    </select>
+                </div>
+                
+                <!-- Timer Settings -->
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="enableTimer" class="mr-2">
+                        <span class="text-sm font-medium text-gray-700">Activer le minuteur</span>
+                    </label>
+                    <div id="timerSettings" class="mt-2 ml-6 hidden">
+                        <label class="block text-sm text-gray-600 mb-1">Temps par question (secondes)</label>
+                        <input type="number" id="timePerQuestion" value="60" min="30" max="300" class="w-24 px-2 py-1 border border-gray-300 rounded text-sm">
+                    </div>
+                </div>
+                
+                <!-- Auto-advance -->
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="autoAdvance" class="mr-2">
+                        <span class="text-sm font-medium text-gray-700">Passer automatiquement à la question suivante</span>
+                    </label>
+                </div>
+                
+                <!-- Show explanations -->
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="showExplanations" class="mr-2" checked>
+                        <span class="text-sm font-medium text-gray-700">Afficher les explications après chaque réponse</span>
+                    </label>
+                </div>
+                
+                <!-- Sound effects -->
+                <div>
+                    <label class="flex items-center">
+                        <input type="checkbox" id="soundEffects" class="mr-2">
+                        <span class="text-sm font-medium text-gray-700">Effets sonores</span>
+                    </label>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 p-6 border-t">
+                <button onclick="resetSettings()" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
+                    Réinitialiser
+                </button>
+                <button onclick="saveSettings()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-xl">
+                <div class="flex items-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <span class="ml-3 text-lg font-medium text-gray-700">Chargement en cours...</span>
+                </div>
+            </div>
+        </div>
+        <!-- Page Header -->
+        <div class="mb-12 text-center slide-in-left">
+            <h1 class="text-5xl font-bold text-gradient mb-4 floating-animation">Revision Mode</h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">Use spaced repetition to prioritize weak questions and reinforce your knowledge with our intelligent learning system.</p>
+            <div class="mt-6 flex justify-center">
+                <div class="w-24 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
+            </div>
+        </div>
+
+        <!-- Revision Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 slide-in-right">
+            <div class="modern-card p-8 hover-scale">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-shrink-0 w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center pulse-glow">
+                        <i data-feather="clock" class="h-8 w-8 text-white"></i>
+                    </div>
+                    <div class="text-right">
+                        <div id="rev-due" class="text-4xl font-bold text-gradient">0</div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Due for Revision</h3>
+                <p class="text-gray-600 text-sm">Questions ready for review</p>
+            </div>
+            <div class="modern-card p-8 hover-scale">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-shrink-0 w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center pulse-glow">
+                        <i data-feather="alert-circle" class="h-8 w-8 text-white"></i>
+                    </div>
+                    <div class="text-right">
+                        <div id="rev-weak" class="text-4xl font-bold text-gradient">0</div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Weak Questions</h3>
+                <p class="text-gray-600 text-sm">Areas needing improvement</p>
+            </div>
+            <div class="modern-card p-8 hover-scale">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex-shrink-0 w-16 h-16 gradient-success rounded-2xl flex items-center justify-center pulse-glow">
+                        <i data-feather="check-circle" class="h-8 w-8 text-white"></i>
+                    </div>
+                    <div class="text-right">
+                        <div id="rev-mastered" class="text-4xl font-bold text-gradient">0</div>
+                    </div>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Mastered Questions</h3>
+                <p class="text-gray-600 text-sm">Successfully completed</p>
+            </div>
+        </div>
+
+        <!-- Start Revision Session -->
+        <div class="modern-card p-8 mb-12 fade-in-up">
+            <div class="md:flex md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-lg font-medium text-gray-900">Ready to revise?</h2>
+                    <p class="mt-1 text-sm text-gray-500">Start a revision session focused on your weak areas.</p>
+                </div>
+                <div class="mt-4 flex md:mt-0 md:ml-4 items-center gap-3">
+                    <select id="module-select" class="px-3 py-2 border rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Select a module...</option>
+                    </select>
+                    <button id="continue-last" type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <i data-feather="refresh-ccw" class="mr-2 h-4 w-4"></i>
+                        Continue last
+                    </button>
+                    <button id="resume-active" type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        <i data-feather="play-circle" class="mr-2 h-4 w-4"></i>
+                        Resume active
+                    </button>
+                    <button id="start-session" type="button" class="neon-button">
+                        <i data-feather="play" class="mr-2 h-4 w-4"></i>
+                        Start Session
+                    </button>
+                    <button onclick="explainWithAI('Quelle est la cause la plus fréquente de pneumonie communautaire ?', 'Streptococcus pneumoniae')" 
+                            class="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" 
+                            aria-label="Tester l'explication IA avec une question d'exemple">
+                        <i data-feather="brain" class="mr-2 h-4 w-4"></i>
+                        Test IA
+                    </button>
+                    <button id="settings-btn" class="ml-2 px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" 
+                            aria-label="Paramètres de révision">
+                        <i data-feather="settings" class="mr-2 h-4 w-4"></i>
+                        Settings
+                    </button>
+                    <button id="help-btn" class="ml-2 px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
+                            aria-label="Aide et raccourcis clavier" onclick="showHelp()">
+                        <i data-feather="help-circle" class="mr-2 h-4 w-4"></i>
+                        Help
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive QCM Trainer -->
+        <div id="qcm-trainer" class="modern-card p-8 mb-12 fade-in-up">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-medium text-gray-900">Interactive Training</h2>
+                <div class="text-sm text-gray-500" id="qcm-progress">0 / 0</div>
+            </div>
+
+            <div id="qcm-loading" class="text-gray-500">Loading questions...</div>
+
+            <div id="qcm-card" class="hidden">
+                <div class="mb-2 text-sm text-gray-500" id="qcm-meta"></div>
+                <h3 id="qcm-question" class="text-xl font-semibold text-gray-900 mb-4">Question</h3>
+                <div id="qcm-choices" class="space-y-3 mb-4"></div>
+
+                <div id="qcm-feedback" class="hidden mt-4 p-3 rounded-md"></div>
+
+                <div class="mt-6 flex items-center gap-3">
+                    <button id="qcm-submit" class="neon-button disabled:opacity-50" disabled aria-label="Vérifier la réponse sélectionnée">
+                        <i data-feather="check-circle" class="mr-2 h-4 w-4"></i>
+                        Check Answer
+                    </button>
+                    <button id="qcm-next" class="neon-button hidden" aria-label="Passer à la question suivante">
+                        <i data-feather="arrow-right" class="mr-2 h-4 w-4"></i>
+                        Next Question
+                    </button>
+                    <button id="qcm-load-more" class="neon-button hidden" aria-label="Charger plus de questions">
+                        <i data-feather="plus-circle" class="mr-2 h-4 w-4"></i>
+                        Load more
+                    </button>
+                    <button id="qcm-hint" class="inline-flex items-center px-3 py-2 border border-yellow-300 shadow-sm text-sm font-medium rounded-md text-yellow-700 bg-yellow-50 hover:bg-yellow-100 hidden" aria-label="Afficher un indice">
+                        <i data-feather="lightbulb" class="mr-2 h-4 w-4"></i>
+                        Hint
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const API_BASE = 'http://localhost:8001/api';
+            let qcms = [];
+            let current = 0;
+            let selectedIndex = null;
+            let correctCount = 0;
+            let resultId = null;
+            let currentModuleId = null;
+            let pageOffset = 0;
+            const pageSize = 25;
+            let answeredSet = new Set();
+
+            let el = {};
+
+            function initializeElements() {
+                el = {
+                    loading: document.getElementById('qcm-loading'),
+                    card: document.getElementById('qcm-card'),
+                    question: document.getElementById('qcm-question'),
+                    choices: document.getElementById('qcm-choices'),
+                    submit: document.getElementById('qcm-submit'),
+                    next: document.getElementById('qcm-next'),
+                    feedback: document.getElementById('qcm-feedback'),
+                    progress: document.getElementById('qcm-progress'),
+                    meta: document.getElementById('qcm-meta'),
+                    moduleSelect: document.getElementById('module-select'),
+                    startBtn: document.getElementById('start-session')
+                };
+            }
+
+            function headers() {
+                const token = localStorage.getItem('token');
+                if (!token) { window.location.href = 'login.html'; return {}; }
+                return { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' };
+            }
+
+            async function loadModules() {
+                try {
+                    // Charger les modules disponibles pour l'utilisateur
+                    const res = await fetch(`${API_BASE}/modules/my`, { headers: headers() });
+                    if (res.status === 401) { window.location.href = 'login.html'; return; }
+                    const modules = await res.json();
+                    el.moduleSelect.innerHTML = '<option value="">Select a module...</option>';
+                    
+                    // Trier les modules par niveau et nom pour un meilleur affichage
+                    const sortedModules = modules.sort((a, b) => {
+                        if (a.level !== b.level) {
+                            return a.level.localeCompare(b.level);
+                        }
+                        return a.name.localeCompare(b.name);
+                    });
+                    
+                    sortedModules.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = `${m.name} (${m.level || ''})`;
+                        el.moduleSelect.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error('loadModules error', e);
+                }
+            }
+
+            async function continueLast() {
+                try {
+                    const res = await fetch(`${API_BASE}/results/my`, { headers: headers() });
+                    const arr = await res.json();
+                    if (Array.isArray(arr) && arr.length) {
+                        const last = arr[0];
+                        if (last.module_id) {
+                            el.moduleSelect.value = last.module_id;
+                            await startSession();
+                        } else {
+                            alert('No previous module found. Please select a module.');
+                        }
+                    } else {
+                        alert('No previous attempts. Please select a module.');
+                    }
+                } catch (e) { console.error('continueLast error', e); }
+            }
+
+            function updateProgress() {
+                el.progress.textContent = `${Math.min(current + 1, qcms.length)} / ${qcms.length}`;
+            }
+
+            function renderQcm() {
+                if (!qcms.length) return;
+                // Move current to first unanswered. If none in current batch, try to load more.
+                while (current < qcms.length && answeredSet.has(qcms[current].id)) {
+                    current += 1;
+                }
+                if (current >= qcms.length) {
+                    // Try to load more; if nothing more, finish.
+                    document.getElementById('qcm-load-more').click();
+                    // After loading more, render will be called again by caller if needed.
+                    return;
+                }
+
+                const q = qcms[current];
+                selectedIndex = null;
+                el.submit.disabled = true;
+                el.next.classList.add('hidden');
+                el.feedback.className = 'hidden mt-4 p-3 rounded-md';
+
+                el.meta.textContent = '';
+                el.question.textContent = q.question;
+                el.choices.innerHTML = '';
+                
+                // Show hint button if question has hint
+                const hintBtn = document.getElementById('qcm-hint');
+                if (hintBtn) {
+                    if (q.hint || q.explanation) {
+                        hintBtn.classList.remove('hidden');
+                    } else {
+                        hintBtn.classList.add('hidden');
+                    }
+                }
+                
+                q.choices.forEach((choice, i) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'w-full text-left px-4 py-3 border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors';
+                    btn.textContent = `${i + 1}. ${choice}`;
+                    btn.setAttribute('aria-label', `Option ${i + 1}: ${choice}`);
+                    btn.addEventListener('click', () => {
+                        selectedIndex = i;
+                        Array.from(el.choices.children).forEach(c => c.classList.remove('ring-2','ring-indigo-500','bg-indigo-50'));
+                        btn.classList.add('ring-2','ring-indigo-500','bg-indigo-50');
+                        el.submit.disabled = false;
+                        
+                        // Play sound effect if enabled
+                        const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
+                        if (settings.soundEffects) {
+                            playSelectSound();
+                        }
+                    });
+                    el.choices.appendChild(btn);
+                });
+                updateProgress();
+            }
+
+            async function startSession() {
+                try {
+                    const moduleId = el.moduleSelect.value;
+                    if (!moduleId) { alert('Please select a module'); return; }
+                    currentModuleId = moduleId;
+                    // Create result session
+                    const r = await fetch(`${API_BASE}/results/start`, {
+                        method: 'POST', headers: headers(),
+                        body: JSON.stringify({ moduleId, mode: 'revision' })
+                    });
+                    const data = await r.json();
+                    if (!r.ok) { alert(data.message || 'Could not start session'); return; }
+                    resultId = data.resultId;
+                    correctCount = 0; current = 0; pageOffset = 0; qcms = [];
+                    await loadQcms(moduleId, true);
+                } catch (e) {
+                    console.error('startSession error', e);
+                }
+            }
+
+            async function loadQcms(moduleId, reset = false) {
+                try {
+                    el.loading.textContent = 'Loading questions...';
+                    el.loading.classList.remove('hidden');
+                    el.card.classList.add('hidden');
+                    const res = await fetch(`${API_BASE}/qcm/sb?moduleId=${encodeURIComponent(moduleId)}&limit=${pageSize}&offset=${pageOffset}`, { headers: headers() });
+                    const data = await res.json();
+                    const batch = Array.isArray(data) ? data : [];
+                    if (reset) { qcms = []; }
+                    qcms = qcms.concat(batch);
+                    el.loading.classList.add('hidden');
+                    if (qcms.length === 0) {
+                        el.loading.classList.remove('hidden');
+                        el.loading.textContent = 'No questions yet for this module.';
+                        return;
+                    }
+                    el.card.classList.remove('hidden');
+                    renderQcm();
+                    // If we received less than a full page, hide load more.
+                    const loadMore = document.getElementById('qcm-load-more');
+                    if (batch.length < pageSize) loadMore.classList.add('hidden');
+                    else loadMore.classList.remove('hidden');
+                } catch (e) {
+                    el.loading.textContent = 'Failed to load questions. Ensure the backend is running.';
+                }
+            }
+
+            async function finishSession() {
+                try {
+                    if (!resultId) return;
+                    const f = await fetch(`${API_BASE}/results/finish`, {
+                        method: 'POST', headers: headers(),
+                        body: JSON.stringify({ resultId })
+                    });
+                    const r = await f.json();
+                    if (!f.ok) { alert(r.message || 'Failed to finish'); return; }
+                    const scorePct = r.result.total > 0 ? Math.round((r.result.score * 100) / r.result.total) : 0;
+                    el.feedback.className = 'mt-4 p-3 rounded-md bg-indigo-50 text-indigo-800';
+                    el.feedback.textContent = `Session finished. Score: ${r.result.score}/${r.result.total} (${scorePct}%).`;
+                    el.feedback.classList.remove('hidden');
+                    el.next.classList.add('hidden');
+                    // Optional: redirect to dashboard after short delay
+                    setTimeout(() => window.location.href = 'index.html', 1200);
+                } catch (e) {
+                    console.error('finish error', e);
+                }
+            }
+
+            // Function to explain with AI - accessible globalement
+            window.explainWithAI = function(question, correctAnswer) {
+                try {
+                    const decodedQuestion = decodeURIComponent(question);
+                    const decodedAnswer = decodeURIComponent(correctAnswer);
+                    
+                    const prompt = `Peux-tu m'expliquer cette question de médecine en détail ?
+
+Question: ${decodedQuestion}
+
+Réponse correcte: ${decodedAnswer}
+
+Je voudrais une explication approfondie sur pourquoi cette réponse est correcte et les concepts médicaux impliqués. Merci !`;
+                    
+                    // URL ChatGPT corrigée
+                    const chatGPTUrl = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
+                    window.open(chatGPTUrl, '_blank');
+                } catch (error) {
+                    console.error('Erreur explainWithAI:', error);
+                    // Fallback : ouvrir ChatGPT sans prompt
+                    window.open('https://chatgpt.com/', '_blank');
+                }
+            }
+
+        // Fonction de test pour créer un token temporaire (à supprimer en production)
+        function createTestToken() {
+            const testPayload = {
+                username: 'etudiant_test',
+                email: 'etudiant@test.com',
+                role: '5A',
+                firstName: 'Étudiant',
+                lastName: 'Test',
+                iat: Math.floor(Date.now() / 1000)
+            };
+            
+            // Créer un faux JWT (juste pour les tests)
+            const header = btoa(JSON.stringify({typ: 'JWT', alg: 'HS256'}));
+            const payload = btoa(JSON.stringify(testPayload));
+            const signature = 'test_signature';
+            
+            return `${header}.${payload}.${signature}`;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Créer un token de test si aucun token n'existe (pour les tests)
+            if (!localStorage.getItem('token')) {
+                localStorage.setItem('token', createTestToken());
+                console.log('Token de test créé pour les démonstrations');
+            }
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Initialize DOM elements first
+            initializeElements();
+            
+            initializeDarkMode();
+            await renderNavProfile();
+            await loadModules();
+            await loadRevisionData();
+            
+            // Add event listeners
+            if (el.startBtn) {
+                el.startBtn.addEventListener('click', startSession);
+            }
+            
+            if (el.submit) {
+                el.submit.addEventListener('click', async () => {
+                    if (selectedIndex === null) return;
+                    const q = qcms[current];
+                    try {
+                        const a = await fetch(`${API_BASE}/results/answer`, {
+                            method: 'POST', headers: headers(),
+                            body: JSON.stringify({ resultId, qcmId: q.id, selectedIndex })
+                        });
+                        const resp = await a.json();
+                        const isCorrect = !!resp.isCorrect;
+                        
+                        // Play sound effects if enabled
+                        const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
+                        if (settings.soundEffects) {
+                            if (isCorrect) {
+                                playCorrectSound();
+                            } else {
+                                playIncorrectSound();
+                            }
+                        }
+                        
+                        // Update session stats
+                        updateSessionStats();
+                        
+                        if (isCorrect) {
+                            correctCount += 1;
+                            el.feedback.className = 'mt-4 p-3 rounded-md bg-green-50 text-green-800';
+                            el.feedback.innerHTML = `
+                                <div class="flex items-center justify-between">
+                                    <span>✅ Correct! Excellente réponse!</span>
+                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(q.choices[selectedIndex] || 'Réponse correcte')}')" 
+                                            class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Explication IA
+                                    </button>
+                                </div>
+                            `;
+                        } else {
+                            el.feedback.className = 'mt-4 p-3 rounded-md bg-red-50 text-red-800';
+                            const ct = resp.correctText ? ` Bonne réponse: ${resp.correctText}` : '';
+                            el.feedback.innerHTML = `
+                                <div class="flex items-center justify-between">
+                                    <span>❌ Incorrect.${ct}</span>
+                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(resp.correctText || 'Réponse correcte non spécifiée')}')" 
+                                            class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                        </svg>
+                                        Explication IA
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        el.feedback.classList.remove('hidden');
+                        el.next.classList.remove('hidden');
+                        el.submit.disabled = true;
+                        
+                        // Handle auto-advance if enabled
+                        handleAutoAdvance();
+                    } catch (e) {
+                        console.error('answer error', e);
+                    }
+                });
+            }
+            
+            if (el.next) {
+                el.next.addEventListener('click', () => {
+                    current += 1;
+                    if (current >= qcms.length) {
+                        finishSession();
+                    } else {
+                        renderQcm();
+                    }
+                });
+            }
+            
+            document.getElementById('continue-last')?.addEventListener('click', continueLast);
+            document.getElementById('resume-active')?.addEventListener('click', async () => {
+                try {
+                    const r = await fetch(`${API_BASE}/results/active`, { headers: headers() });
+                    const active = await r.json();
+                    if (!active) { alert('No active session found. Start a new one.'); return; }
+                    resultId = active.id;
+                    currentModuleId = active.module_id;
+                    el.moduleSelect.value = currentModuleId;
+                    // Get answered questions to skip
+                    const a = await fetch(`${API_BASE}/results/${resultId}/answers`, { headers: headers() });
+                    const answered = await a.json();
+                    answeredSet = new Set(answered);
+                    correctCount = 0; current = 0; pageOffset = 0; qcms = [];
+                    await loadQcms(currentModuleId, true);
+                } catch (e) { console.error('resumeActive error', e); }
+            });
+            
+            document.getElementById('qcm-load-more')?.addEventListener('click', async () => {
+                if (!currentModuleId) return;
+                pageOffset += pageSize;
+                await loadQcms(currentModuleId);
+                // render next question if we were at the end
+                if (current >= qcms.length) {
+                    renderQcm();
+                }
+            });
+            
+            // Initialize feather icons
+            feather.replace();
+            
+            // Add event listeners for new features
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', showSettingsModal);
+            }
+            
+            const hintBtn = document.getElementById('qcm-hint');
+            if (hintBtn) {
+                hintBtn.addEventListener('click', showHint);
+            }
+            
+            const enableTimerCheckbox = document.getElementById('enableTimer');
+            if (enableTimerCheckbox) {
+                enableTimerCheckbox.addEventListener('change', toggleTimerSettings);
+            }
+            
+            // Setup keyboard shortcuts
+            setupKeyboardShortcuts();
+            
+            // Test de la fonction explainWithAI
+            console.log('explainWithAI function available:', typeof window.explainWithAI);
+        });
+
+        async function renderNavProfile() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            try {
+                // Décoder le token JWT pour obtenir les informations utilisateur
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const userInitials = payload.username ? payload.username.substring(0, 2).toUpperCase() : 'EM';
+                
+                // Update profile display
+                const profileButtons = document.querySelectorAll('.h-8.w-8 span');
+                profileButtons.forEach(btn => {
+                    btn.textContent = userInitials;
+                });
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                // Fallback display
+                const profileButtons = document.querySelectorAll('.h-8.w-8 span');
+                profileButtons.forEach(btn => {
+                    btn.textContent = 'EM';
+                });
+            }
+        }
+
+        async function loadRevisionData() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                const [resultsRes, modulesRes] = await Promise.all([
+                    fetch('http://localhost:8001/api/results/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:8001/api/modules/my', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (resultsRes.ok && modulesRes.ok) {
+                    const resultsData = await resultsRes.json();
+                    const modulesData = await modulesRes.json();
+                    
+                    displayRecentActivity(resultsData);
+                    displayModules(modulesData);
+                    displayWeakestAreas(resultsData, modulesData);
+                }
+            } catch (error) {
+                console.error('Error loading revision data:', error);
+            }
+        }
+
+        function displayRecentActivity(results) {
+            const container = document.getElementById('recentActivityContainer');
+            if (!container) return;
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="p-6 text-center">
+                        <p class="text-gray-500">Aucune activité récente</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const recentResults = results.slice(0, 5);
+            container.innerHTML = recentResults.map(result => {
+                const isCompleted = result.completed_at;
+                const score = result.score || 0;
+                const total = result.total || 0;
+                const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+                
+                let iconColor, icon;
+                if (isCompleted) {
+                    if (percentage >= 80) {
+                        iconColor = 'bg-green-100 text-green-600';
+                        icon = 'check-circle';
+                    } else if (percentage >= 60) {
+                        iconColor = 'bg-blue-100 text-blue-600';
+                        icon = 'check-circle';
+                    } else {
+                        iconColor = 'bg-yellow-100 text-yellow-600';
+                        icon = 'alert-circle';
+                    }
+                } else {
+                    iconColor = 'bg-gray-100 text-gray-600';
+                    icon = 'clock';
+                }
+
+                const timeText = formatRelativeTime(result.completed_at || result.started_at);
+                const statusText = isCompleted 
+                    ? `Score: ${score}/${total} (${percentage}%)`
+                    : `En cours: ${score}/${total} questions`;
+
+                return `
+                    <div class="p-6">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full ${iconColor} flex items-center justify-center">
+                                <i data-feather="${icon}" class="h-5 w-5"></i>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        ${isCompleted ? 'Terminé' : 'Commencé'} ${result.module_name || 'Module'}
+                                    </p>
+                                    <p class="text-sm text-gray-500">${timeText}</p>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">${statusText}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            feather.replace();
+        }
+
+        function displayModules(modules) {
+            const container = document.getElementById('modulesContainer');
+            if (!container) return;
+            
+            if (!modules || modules.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-500">Aucun module disponible</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Afficher tous les modules sans limite
+            container.innerHTML = modules.map(module => {
+                return `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                        <i data-feather="book" class="h-5 w-5"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <h3 class="text-lg font-medium text-gray-900">${module.name}</h3>
+                                        <p class="text-sm text-gray-500">${module.qcm_count} QCM(s) • ${module.level}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button onclick="startRevision('${module.id}')" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Réviser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            feather.replace();
+        }
+
+        async function startRevision(moduleId) {
+            try {
+                // Afficher le chargement
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+                
+                // Charger les QCM du module sélectionné
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/qcm/sb?moduleId=${moduleId}&limit=50&offset=0`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const moduleQcms = await response.json();
+                    if (moduleQcms && moduleQcms.length > 0) {
+                        // Mettre à jour les variables globales
+                        qcms = moduleQcms;
+                        current = 0;
+                        
+                        // Afficher la section d'entraînement interactif
+                        const trainerSection = document.getElementById('qcm-trainer');
+                        if (trainerSection) {
+                            trainerSection.classList.remove('hidden');
+                            
+                            // Faire défiler vers la section d'entraînement
+                            trainerSection.scrollIntoView({ behavior: 'smooth' });
+                            
+                            // Initialiser l'affichage des QCM
+                            renderQcm();
+                            updateProgress();
+                        }
+                        
+                        // Mettre à jour l'activité récente en ajoutant cette session
+                        await updateRecentActivity(moduleId);
+                        
+                    } else {
+                        alert('Aucun QCM disponible pour ce module.');
+                    }
+                } else {
+                    throw new Error('Erreur lors du chargement des QCM');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors du chargement des QCM');
+            } finally {
+                const loadingIndicator = document.getElementById('loading-indicator');
+                if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            }
+        }
+        
+        // Fonction pour mettre à jour l'activité récente
+        async function updateRecentActivity(moduleId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/results`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        module_id: moduleId,
+                        started_at: new Date().toISOString(),
+                        mode: 'revision'
+                    })
+                });
+                
+                if (response.ok) {
+                    // Recharger les données de révision pour mettre à jour l'activité récente
+                    loadRevisionData();
+                }
+            } catch (error) {
+                console.error('Erreur lors de la mise à jour de l\'activité:', error);
+            }
+        }
+
+        function displayWeakestAreas(results, modules) {
+            const container = document.getElementById('weakestAreasContainer');
+            if (!container) return;
+            
+            // Calculate performance by module
+            const modulePerformance = {};
+            const moduleMap = {};
+            
+            // Create module lookup
+            modules.forEach(module => {
+                moduleMap[module.id] = module;
+                modulePerformance[module.id] = {
+                    name: module.name,
+                    level: module.level,
+                    totalQuestions: 0,
+                    correctAnswers: 0,
+                    attempts: 0
+                };
+            });
+            
+            // Process results to calculate performance
+            if (Array.isArray(results)) {
+                results.forEach(result => {
+                    if (result.module_id && modulePerformance[result.module_id]) {
+                        const perf = modulePerformance[result.module_id];
+                        perf.totalQuestions += result.total || 0;
+                        perf.correctAnswers += result.score || 0;
+                        perf.attempts += 1;
+                    }
+                });
+            }
+            
+            // Filter and sort by worst performance (lowest success rate)
+            const weakAreas = Object.entries(modulePerformance)
+                .filter(([moduleId, perf]) => perf.totalQuestions > 0) // Only modules with attempts
+                .map(([moduleId, perf]) => ({
+                    moduleId,
+                    ...perf,
+                    successRate: Math.round((perf.correctAnswers / perf.totalQuestions) * 100)
+                }))
+                .sort((a, b) => a.successRate - b.successRate) // Sort by lowest success rate first
+                .slice(0, 6); // Show top 6 weakest areas
+            
+            if (weakAreas.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8">
+                        <div class="flex flex-col items-center">
+                            <i data-feather="target" class="h-12 w-12 text-gray-400 mb-4"></i>
+                            <p class="text-gray-500 text-lg mb-2">Aucune donnée de performance disponible</p>
+                            <p class="text-gray-400 text-sm">Commencez à répondre aux QCMs pour voir vos zones faibles</p>
+                        </div>
+                    </div>
+                `;
+                feather.replace();
+                return;
+            }
+            
+            container.innerHTML = weakAreas.map(area => {
+                let bgColor, iconColor, barColor;
+                if (area.successRate < 40) {
+                    bgColor = 'bg-red-100';
+                    iconColor = 'text-red-600';
+                    barColor = 'bg-red-500';
+                } else if (area.successRate < 60) {
+                    bgColor = 'bg-yellow-100';
+                    iconColor = 'text-yellow-600';
+                    barColor = 'bg-yellow-500';
+                } else {
+                    bgColor = 'bg-orange-100';
+                    iconColor = 'text-orange-600';
+                    barColor = 'bg-orange-500';
+                }
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 card-hover">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full ${bgColor} flex items-center justify-center">
+                                    <i data-feather="alert-triangle" class="h-5 w-5 ${iconColor}"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <h3 class="text-lg font-medium text-gray-900">${area.name}</h3>
+                                    <p class="text-sm text-gray-500">${area.level || 'Module'} • ${area.attempts} session${area.attempts > 1 ? 's' : ''}</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Taux de réussite</span>
+                                    <span class="font-medium">${area.successRate}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="${barColor} h-2 rounded-full transition-all duration-500" style="width: ${area.successRate}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>${area.correctAnswers}/${area.totalQuestions} correctes</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <button onclick="focusOnModule('${area.moduleId}')" type="button" class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-bg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <i data-feather="target" class="mr-2 h-4 w-4"></i>
+                                    Se concentrer sur ce module
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            feather.replace();
+        }
+        
+        function focusOnModule(moduleId) {
+            // Set the module in the dropdown and start a revision session
+            const moduleSelect = document.getElementById('module-select');
+            if (moduleSelect) {
+                moduleSelect.value = moduleId;
+                // Scroll to the revision section
+                document.getElementById('qcm-trainer').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Fonction pour afficher toute l'activité dans la modal
+        function showAllActivity() {
+            const modal = document.getElementById('activityModal');
+            const container = document.getElementById('allActivityContainer');
+            
+            // Show loading
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="loading-spinner mx-auto mb-4"></div>
+                    <p class="text-gray-500">Chargement de votre activité...</p>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+            
+            // Load all activity
+            loadAllActivity();
+        }
+        
+        function closeActivityModal() {
+            const modal = document.getElementById('activityModal');
+            modal.classList.remove('show');
+        }
+        
+        async function loadAllActivity() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                
+                const response = await fetch('http://localhost:8001/api/results/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!response.ok) throw new Error('Erreur lors du chargement');
+                
+                const results = await response.json();
+                displayAllActivity(results);
+                
+            } catch (error) {
+                console.error('Erreur chargement activité:', error);
+                document.getElementById('allActivityContainer').innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-red-500">Erreur lors du chargement de l'activité</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function displayAllActivity(results) {
+            const container = document.getElementById('allActivityContainer');
+            
+            if (!results || results.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <p class="text-gray-500">Aucune activité trouvée</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = results.map(result => {
+                const isCompleted = result.completed_at;
+                const score = result.score || 0;
+                const total = result.total || 0;
+                const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+                
+                let iconColor, icon;
+                if (isCompleted) {
+                    if (percentage >= 80) {
+                        iconColor = 'bg-green-100 text-green-600';
+                        icon = 'check-circle';
+                    } else if (percentage >= 60) {
+                        iconColor = 'bg-blue-100 text-blue-600';
+                        icon = 'check-circle';
+                    } else {
+                        iconColor = 'bg-yellow-100 text-yellow-600';
+                        icon = 'alert-circle';
+                    }
+                } else {
+                    iconColor = 'bg-gray-100 text-gray-600';
+                    icon = 'clock';
+                }
+
+                const timeText = formatRelativeTime(result.completed_at || result.started_at);
+                const statusText = isCompleted 
+                    ? `Score: ${score}/${total} (${percentage}%)`
+                    : `En cours: ${score}/${total} questions`;
+
+                return `
+                    <div class="border-b border-gray-200 p-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full ${iconColor} flex items-center justify-center">
+                                <i data-feather="${icon}" class="h-5 w-5"></i>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        ${isCompleted ? 'Terminé' : 'Commencé'} ${result.module_name || 'Module'}
+                                    </p>
+                                    <p class="text-sm text-gray-500">${timeText}</p>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-1">${statusText}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            feather.replace();
+        }
+
+        function formatRelativeTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+            if (diffDays > 0) {
+                return `il y a ${diffDays} jour${diffDays > 1 ? 's' : ''}`;
+            } else if (diffHours > 0) {
+                return `il y a ${diffHours} heure${diffHours > 1 ? 's' : ''}`;
+            } else if (diffMinutes > 0) {
+                return `il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''}`;
+            } else {
+                return 'à l\'instant';
+            }
+        }
+
+        // Dark Mode and Profile functions
+        function toggleDarkMode() {
+            const body = document.body;
+            const isDark = body.classList.contains('dark');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (isDark) {
+                body.classList.remove('dark');
+                if (icon) icon.setAttribute('data-feather', 'moon');
+                localStorage.setItem('darkMode', 'false');
+            } else {
+                body.classList.add('dark');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+                localStorage.setItem('darkMode', 'true');
+            }
+            feather.replace();
+        }
+        
+        function initializeDarkMode() {
+            const darkMode = localStorage.getItem('darkMode');
+            const icon = document.getElementById('darkModeIcon');
+            
+            if (darkMode === 'true') {
+                document.body.classList.add('dark');
+                if (icon) icon.setAttribute('data-feather', 'sun');
+            } else {
+                document.body.classList.remove('dark');
+                if (icon) icon.setAttribute('data-feather', 'moon');
+            }
+            feather.replace();
+        }
+
+        function toggleProfileMenu() {
+            const menu = document.getElementById('profileMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        async function showUserProfile() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Décoder le token JWT pour obtenir les informations utilisateur
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const profile = {
+                    username: payload.username || payload.email || 'Utilisateur',
+                    email: payload.email || 'Non spécifié',
+                    level: payload.role || 'Non spécifié',
+                    subscription_type: 'Standard',
+                    created_at: new Date().toISOString()
+                };
+                
+                // Séparer le nom complet en prénom et nom si possible
+                const fullName = profile.username.split(' ');
+                const firstName = fullName[0] || '';
+                const lastName = fullName.slice(1).join(' ') || '';
+                
+                // Remplir les champs du profil
+                document.getElementById('profileFirstName').value = firstName;
+                document.getElementById('profileLastName').value = lastName;
+                document.getElementById('profileUsername').value = profile.username;
+                document.getElementById('profileEmail').value = profile.email;
+                document.getElementById('profileLevel').value = profile.level;
+                
+                // Mettre à jour l'avatar et les informations d'affichage
+                const initials = profile.username.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                document.getElementById('profileDisplayName').textContent = profile.username;
+                document.getElementById('profileMemberSince').textContent = new Date(profile.created_at).getFullYear();
+                
+                // Afficher le modal et s'assurer que l'onglet profil est actif
+                showProfileTab();
+                document.getElementById('userProfileModal').classList.remove('hidden');
+                feather.replace();
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement du profil');
+            }
+        }
+        
+        function closeUserProfileModal() {
+            document.getElementById('userProfileModal').classList.add('hidden');
+        }
+
+        function showProfileTab() {
+            // Afficher le contenu du profil et masquer celui du mot de passe
+            document.getElementById('profileTabContent').classList.remove('hidden');
+            document.getElementById('passwordTabContent').classList.add('hidden');
+            
+            // Mettre à jour les boutons de navigation
+            document.getElementById('profileTabBtn').classList.add('bg-gray-100');
+            document.getElementById('passwordTabBtn').classList.remove('bg-gray-100');
+            
+            // Mettre à jour le titre
+            document.getElementById('modalTitle').textContent = 'Profil';
+        }
+
+        function showPasswordTab() {
+            // Afficher le contenu du mot de passe et masquer celui du profil
+            document.getElementById('profileTabContent').classList.add('hidden');
+            document.getElementById('passwordTabContent').classList.remove('hidden');
+            
+            // Mettre à jour les boutons de navigation
+            document.getElementById('profileTabBtn').classList.remove('bg-gray-100');
+            document.getElementById('passwordTabBtn').classList.add('bg-gray-100');
+            
+            // Mettre à jour le titre
+            document.getElementById('modalTitle').textContent = 'Changer le mot de passe';
+            
+            // Nettoyer les champs de mot de passe
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+
+        async function saveProfile() {
+            try {
+                const firstName = document.getElementById('profileFirstName').value;
+                const lastName = document.getElementById('profileLastName').value;
+                const username = document.getElementById('profileUsername').value;
+                const email = document.getElementById('profileEmail').value;
+                const level = document.getElementById('profileLevel').value;
+
+                if (!username || !email) {
+                    alert('Le nom d\'utilisateur et l\'email sont requis');
+                    return;
+                }
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour sauvegarder votre profil');
+                    return;
+                }
+
+                // Appel API backend pour sauvegarder le profil
+                const resp = await fetch('http://localhost:8001/api/user/me', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ firstName, lastName, username, email })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.message || 'Impossible de sauvegarder le profil');
+                }
+                alert('Profil sauvegardé avec succès !');
+                
+                // Mettre à jour l'affichage
+                const fullName = `${firstName} ${lastName}`.trim() || username;
+                document.getElementById('profileDisplayName').textContent = fullName;
+                
+                // Mettre à jour les initiales
+                const initials = fullName.substring(0, 2).toUpperCase();
+                document.getElementById('profileAvatarInitials').textContent = initials;
+                
+                // Mettre à jour aussi l'avatar dans la navigation
+                const navInitials = document.querySelectorAll('.h-8.w-8 span');
+                navInitials.forEach(span => {
+                    span.textContent = initials;
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde:', error);
+                alert('Erreur lors de la sauvegarde du profil');
+            }
+        }
+
+        async function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmNewPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('Les nouveaux mots de passe ne correspondent pas');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Le nouveau mot de passe doit contenir au moins 6 caractères');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    alert('Vous devez être connecté pour changer votre mot de passe');
+                    return;
+                }
+                // Appel API réel pour changement du mot de passe
+                const response = await fetch('http://localhost:8001/api/user/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ currentPassword: current, newPassword: newPass })
+                });
+
+                if (response.ok) {
+                    alert('Mot de passe changé avec succès !');
+                } else {
+                    const error = await response.json().catch(() => ({}));
+                    alert('Erreur: ' + (error.message || 'Impossible de changer le mot de passe'));
+                    return;
+                }
+                
+                // Nettoyer les champs
+                document.getElementById('currentPassword').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+                
+            } catch (error) {
+                console.error('Erreur lors du changement de mot de passe:', error);
+                alert('Erreur lors du changement de mot de passe');
+            }
+        }
+
+        function logout() {
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Settings Modal Functions
+        function showSettingsModal() {
+            loadSettings();
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
+            
+            // Load difficulty setting
+            const difficulty = settings.difficulty || 'easy';
+            document.querySelector(`input[name="difficulty"][value="${difficulty}"]`).checked = true;
+            
+            // Load questions per session
+            document.getElementById('questionsPerSession').value = settings.questionsPerSession || '20';
+            
+            // Load timer settings
+            document.getElementById('enableTimer').checked = settings.enableTimer || false;
+            document.getElementById('timePerQuestion').value = settings.timePerQuestion || 60;
+            toggleTimerSettings();
+            
+            // Load other settings
+            document.getElementById('autoAdvance').checked = settings.autoAdvance || false;
+            document.getElementById('showExplanations').checked = settings.showExplanations !== false;
+            document.getElementById('soundEffects').checked = settings.soundEffects || false;
+        }
+
+        function saveSettings() {
+            const settings = {
+                difficulty: document.querySelector('input[name="difficulty"]:checked').value,
+                questionsPerSession: document.getElementById('questionsPerSession').value,
+                enableTimer: document.getElementById('enableTimer').checked,
+                timePerQuestion: document.getElementById('timePerQuestion').value,
+                autoAdvance: document.getElementById('autoAdvance').checked,
+                showExplanations: document.getElementById('showExplanations').checked,
+                soundEffects: document.getElementById('soundEffects').checked
+            };
+            
+            localStorage.setItem('revisionSettings', JSON.stringify(settings));
+            showNotification('Paramètres sauvegardés avec succès !', 'success');
+            closeSettingsModal();
+        }
+
+        function resetSettings() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?')) {
+                localStorage.removeItem('revisionSettings');
+                loadSettings();
+                showNotification('Paramètres réinitialisés', 'info');
+            }
+        }
+
+        function toggleTimerSettings() {
+            const enableTimer = document.getElementById('enableTimer').checked;
+            const timerSettings = document.getElementById('timerSettings');
+            if (enableTimer) {
+                timerSettings.classList.remove('hidden');
+            } else {
+                timerSettings.classList.add('hidden');
+            }
+        }
+
+        // Hint functionality
+        function showHint() {
+            if (qcms.length > 0 && current < qcms.length) {
+                const q = qcms[current];
+                const hint = q.hint || "Réfléchissez aux concepts de base de cette matière.";
+                showNotification(`💡 Indice: ${hint}`, 'info', 5000);
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                info: 'bg-blue-500 text-white',
+                warning: 'bg-yellow-500 text-black'
+            };
+            
+            notification.className += ` ${colors[type] || colors.info}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Keyboard shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', function(e) {
+                // Only activate shortcuts when not typing in inputs
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                switch(e.key) {
+                    case '1':
+                    case '2':
+                    case '3':
+                    case '4':
+                        e.preventDefault();
+                        const choiceIndex = parseInt(e.key) - 1;
+                        const choices = document.querySelectorAll('#qcm-choices button');
+                        if (choices[choiceIndex]) {
+                            choices[choiceIndex].click();
+                        }
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        const submitBtn = document.getElementById('qcm-submit');
+                        const nextBtn = document.getElementById('qcm-next');
+                        if (!nextBtn.classList.contains('hidden')) {
+                            nextBtn.click();
+                        } else if (!submitBtn.disabled) {
+                            submitBtn.click();
+                        }
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        showHint();
+                        break;
+                    case 's':
+                        if (e.ctrlKey) {
+                            e.preventDefault();
+                            showSettingsModal();
+                        }
+                        break;
+                    case 'Escape':
+                        e.preventDefault();
+                        // Close any open modals
+                        closeSettingsModal();
+                        closeUserProfileModal();
+                        break;
+                }
+            });
+        }
+
+        // Sound effects
+        function playSelectSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (error) {
+                console.log('Sound not supported');
+            }
+        }
+
+        function playCorrectSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+                oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+                oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('Sound not supported');
+            }
+        }
+
+        function playIncorrectSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.15);
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('Sound not supported');
+            }
+        }
+
+        // Progress tracking
+        function updateSessionStats() {
+            const stats = JSON.parse(localStorage.getItem('sessionStats') || '{}');
+            const today = new Date().toDateString();
+            
+            if (!stats[today]) {
+                stats[today] = { questions: 0, correct: 0, time: 0 };
+            }
+            
+            stats[today].questions += 1;
+            if (selectedIndex !== null && qcms[current]) {
+                // This would be updated when we know if answer is correct
+                // stats[today].correct += isCorrect ? 1 : 0;
+            }
+            
+            localStorage.setItem('sessionStats', JSON.stringify(stats));
+        }
+
+        // Auto-advance functionality
+        function handleAutoAdvance() {
+            const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
+            if (settings.autoAdvance) {
+                setTimeout(() => {
+                    const nextBtn = document.getElementById('qcm-next');
+                    if (!nextBtn.classList.contains('hidden')) {
+                        nextBtn.click();
+                    }
+                }, 2000); // Wait 2 seconds before auto-advancing
+            }
+        }
+
+        // Help function
+        function showHelp() {
+            const helpContent = `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-900">🚀 Raccourcis Clavier</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div class="space-y-2">
+                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">1-4</kbd> Sélectionner une réponse</div>
+                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Entrée</kbd> Valider/Question suivante</div>
+                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">H</kbd> Afficher un indice</div>
+                        </div>
+                        <div class="space-y-2">
+                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Ctrl+S</kbd> Ouvrir les paramètres</div>
+                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Échap</kbd> Fermer les modals</div>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-semibold text-gray-900">⚙️ Fonctionnalités</h3>
+                    <ul class="text-sm space-y-1 text-gray-600">
+                        <li>• <strong>Paramètres :</strong> Personnalisez votre expérience (difficulté, minuteur, effets sonores)</li>
+                        <li>• <strong>Explication IA :</strong> Obtenez des explications détaillées via ChatGPT</li>
+                        <li>• <strong>Indices :</strong> Bouton d'aide disponible pour certaines questions</li>
+                        <li>• <strong>Auto-avance :</strong> Passage automatique à la question suivante</li>
+                        <li>• <strong>Effets sonores :</strong> Feedback audio pour les réponses</li>
+                    </ul>
+                    
+                    <h3 class="text-lg font-semibold text-gray-900">💡 Conseils</h3>
+                    <ul class="text-sm space-y-1 text-gray-600">
+                        <li>• Utilisez les raccourcis clavier pour une navigation plus rapide</li>
+                        <li>• Activez les effets sonores pour un meilleur feedback</li>
+                        <li>• Consultez les explications IA pour approfondir vos connaissances</li>
+                        <li>• Ajustez la difficulté selon votre niveau</li>
+                    </ul>
+                </div>
+            `;
+            
+            showNotification(helpContent, 'info', 10000);
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.getElementById('userProfileDropdown');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileMenu.classList.add('hidden');
+            }
+            
+            // Close modal when clicking outside
+            const modal = document.getElementById('activityModal');
+            if (event.target === modal) {
+                closeActivityModal();
+            }
+        });
+
+
+        </script>
+
+        <!-- Activité Récente -->
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Activité Récente</h2>
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div id="recentActivityContainer" class="divide-y divide-gray-200">
+                    <!-- Activities will be loaded dynamically -->
+                </div>
+                <div class="px-6 py-4 bg-gray-50 text-center">
+                    <button type="button" class="neon-button" onclick="showAllActivity()">
+                        <i data-feather="activity" class="mr-2 h-4 w-4"></i>
+                        Voir toute l'activité
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weakest Areas -->
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Your Weakest Areas</h2>
+            <div id="weakestAreasContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Weakest areas will be loaded dynamically -->
+            </div>
+        </div>
+
+        <!-- Modules Disponibles -->
+        <div class="mb-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Modules Disponibles</h2>
+            <div id="modulesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Modules will be loaded dynamically -->
+            </div>
+        </div>
+        
+        <!-- Activity Modal -->
+        <div id="activityModal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-gradient">Toute votre activité</h2>
+                        <button onclick="closeActivityModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                            <i data-feather="x" class="h-6 w-6 text-gray-500"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6 overflow-y-auto" style="max-height: 60vh;">
+                    <div id="allActivityContainer">
+                        <!-- All activities will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+</body>
+</html>
