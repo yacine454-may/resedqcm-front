@@ -695,7 +695,10 @@
         </div>
 
         <script>
-            const API_BASE = 'http://localhost:8001/api';
+            // API Base URL - works for both local development and production
+            const API_BASE = window.location.hostname === 'localhost' 
+                ? 'http://localhost:8001/api' 
+                : 'https://resicoqcm-backend.onrender.com/api';
             let qcms = [];
             let current = 0;
             let selectedIndex = null;
@@ -1142,10 +1145,10 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                 }
 
                 const [resultsRes, modulesRes] = await Promise.all([
-                    fetch('http://localhost:8001/api/results/my', {
+                    fetch(`${API_BASE}/results/my`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }),
-                    fetch('http://localhost:8001/api/modules/my', {
+                    fetch(`${API_BASE}/modules/my`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
                 ]);
@@ -1496,7 +1499,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                 const token = localStorage.getItem('token');
                 if (!token) return;
                 
-                const response = await fetch('http://localhost:8001/api/results/my', {
+                const response = await fetch(`${API_BASE}/results/my`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
@@ -1734,7 +1737,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                 }
 
                 // Appel API backend pour sauvegarder le profil
-                const resp = await fetch('http://localhost:8001/api/user/me', {
+                const resp = await fetch(`${API_BASE}/user/me`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1796,7 +1799,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                     return;
                 }
                 // Appel API réel pour changement du mot de passe
-                const response = await fetch('http://localhost:8001/api/user/change-password', {
+                const response = await fetch(`${API_BASE}/user/change-password`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
