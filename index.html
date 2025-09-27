@@ -13,6 +13,39 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    
+    <!-- Auto-redirect to login if not authenticated -->
+    <script>
+        // Check if user is authenticated before loading the dashboard
+        (function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // No token found, redirect to login
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Check if token is valid (basic check)
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                const now = Date.now() / 1000;
+                if (payload.exp && payload.exp < now) {
+                    // Token expired, clear it and redirect
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('authUser');
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } catch (error) {
+                // Invalid token format, clear it and redirect
+                localStorage.removeItem('token');
+                localStorage.removeItem('authUser');
+                window.location.href = 'login.html';
+                return;
+            }
+        })();
+    </script>
+    
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
