@@ -32,6 +32,10 @@
       "dest": "/exploration.html"
     },
     {
+      "src": "/api/(.*)",
+      "dest": "https://qcmbackend-i16b.onrender.com/api/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }
