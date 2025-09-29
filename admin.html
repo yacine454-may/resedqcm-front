@@ -3,7 +3,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin | ResicoQCM</title>
-  <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="static/favicon.ico">
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/feather-icons"></script>
   
   <!-- Auto-redirect to login if not authenticated or not admin -->
@@ -1515,6 +1516,13 @@
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     }
+
+    // Initialize Feather icons
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof feather !== 'undefined') {
+        feather.replace();
+      }
+    });
   </script>
 </body>
 </html>
