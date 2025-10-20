@@ -973,32 +973,39 @@
             }
 
             // Function to explain with AI - accessible globalement
-            window.explainWithAI = function(question, options, correctAnswer) {
+            function explainWithAI(question, options, correctAnswer) {
                 try {
-                    const decodedQuestion = decodeURIComponent(question);
-                    const decodedOptions = decodeURIComponent(options);
-                    const decodedAnswer = decodeURIComponent(correctAnswer);
+                    console.log('explainWithAI called with:', { question, options, correctAnswer });
                     
                     const prompt = `Peux-tu m'expliquer cette question de médecine en détail ?
 
-Question: ${decodedQuestion}
+Question: ${question}
 
 Options:
-${decodedOptions}
+${options}
 
-Réponse correcte: ${decodedAnswer}
+Réponse correcte: ${correctAnswer}
 
 Je voudrais une explication approfondie sur pourquoi cette réponse est correcte, pourquoi les autres options sont incorrectes, et les concepts médicaux impliqués. Merci !`;
                     
+                    console.log('Opening ChatGPT with prompt:', prompt);
+                    
                     // URL ChatGPT corrigée
                     const chatGPTUrl = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
-                    window.open(chatGPTUrl, '_blank');
+                    const newWindow = window.open(chatGPTUrl, '_blank');
+                    
+                    if (!newWindow) {
+                        alert('Veuillez autoriser les pop-ups pour utiliser cette fonctionnalité');
+                    }
                 } catch (error) {
                     console.error('Erreur explainWithAI:', error);
                     // Fallback : ouvrir ChatGPT sans prompt
                     window.open('https://chatgpt.com/', '_blank');
                 }
             }
+            
+            // Rendre accessible globalement
+            window.explainWithAI = explainWithAI;
 
         // Fonction de test pour créer un token temporaire (à supprimer en production)
         function createTestToken() {
@@ -1105,8 +1112,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                             el.feedback.innerHTML = `
                                 <div class="flex items-center justify-between">
                                     <span>✅ Correct! Excellente réponse!</span>
-                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(optionsText)}', '${encodeURIComponent(correctAnswer)}')" 
-                                            class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                    <button id="ai-explain-btn" class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                         </svg>
@@ -1120,8 +1126,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                             el.feedback.innerHTML = `
                                 <div class="flex items-center justify-between">
                                     <span>❌ Incorrect.${ct}</span>
-                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(optionsText)}', '${encodeURIComponent(correctAnswer)}')" 
-                                            class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
+                                    <button id="ai-explain-btn" class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                         </svg>
@@ -1130,6 +1135,16 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                                 </div>
                             `;
                         }
+                        
+                        // Ajouter l'event listener au bouton IA
+                        setTimeout(() => {
+                            const aiBtn = document.getElementById('ai-explain-btn');
+                            if (aiBtn) {
+                                aiBtn.addEventListener('click', () => {
+                                    explainWithAI(q.question, optionsText, correctAnswer);
+                                });
+                            }
+                        }, 100);
                         el.feedback.classList.remove('hidden');
                         el.next.classList.remove('hidden');
                         el.submit.disabled = true;
