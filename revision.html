@@ -490,96 +490,6 @@
     </div>
   </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-            <div class="flex justify-between items-center p-6 border-b">
-                <h3 class="text-xl font-semibold text-gray-800">Paramètres de Révision</h3>
-                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-gray-700">
-                    <i data-feather="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-6 space-y-6">
-                <!-- Difficulty Settings -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">Niveau de difficulté</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center">
-                            <input type="radio" name="difficulty" value="easy" class="mr-2" checked>
-                            <span class="text-sm">Facile - Questions de base</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="difficulty" value="medium" class="mr-2">
-                            <span class="text-sm">Moyen - Questions intermédiaires</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="difficulty" value="hard" class="mr-2">
-                            <span class="text-sm">Difficile - Questions avancées</span>
-                        </label>
-                        <label class="flex items-center">
-                            <input type="radio" name="difficulty" value="mixed" class="mr-2">
-                            <span class="text-sm">Mixte - Tous niveaux</span>
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Questions per session -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Questions par session</label>
-                    <select id="questionsPerSession" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="10">10 questions</option>
-                        <option value="20" selected>20 questions</option>
-                        <option value="30">30 questions</option>
-                        <option value="50">50 questions</option>
-                    </select>
-                </div>
-                
-                <!-- Timer Settings -->
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="enableTimer" class="mr-2">
-                        <span class="text-sm font-medium text-gray-700">Activer le minuteur</span>
-                    </label>
-                    <div id="timerSettings" class="mt-2 ml-6 hidden">
-                        <label class="block text-sm text-gray-600 mb-1">Temps par question (secondes)</label>
-                        <input type="number" id="timePerQuestion" value="60" min="30" max="300" class="w-24 px-2 py-1 border border-gray-300 rounded text-sm">
-                    </div>
-                </div>
-                
-                <!-- Auto-advance -->
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="autoAdvance" class="mr-2">
-                        <span class="text-sm font-medium text-gray-700">Passer automatiquement à la question suivante</span>
-                    </label>
-                </div>
-                
-                <!-- Show explanations -->
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="showExplanations" class="mr-2" checked>
-                        <span class="text-sm font-medium text-gray-700">Afficher les explications après chaque réponse</span>
-                    </label>
-                </div>
-                
-                <!-- Sound effects -->
-                <div>
-                    <label class="flex items-center">
-                        <input type="checkbox" id="soundEffects" class="mr-2">
-                        <span class="text-sm font-medium text-gray-700">Effets sonores</span>
-                    </label>
-                </div>
-            </div>
-            <div class="flex justify-end space-x-3 p-6 border-t">
-                <button onclick="resetSettings()" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50">
-                    Réinitialiser
-                </button>
-                <button onclick="saveSettings()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                    Sauvegarder
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -601,86 +511,59 @@
             </div>
         </div>
 
-        <!-- Revision Stats -->
+        <!-- Module Categories -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 slide-in-right">
-            <div class="modern-card p-8 hover-scale">
+            <div class="modern-card p-8 hover-scale cursor-pointer" onclick="showCategoryModules('Médicale')">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex-shrink-0 w-16 h-16 gradient-bg rounded-2xl flex items-center justify-center pulse-glow">
-                        <i data-feather="clock" class="h-8 w-8 text-white"></i>
+                        <i data-feather="heart" class="h-8 w-8 text-white"></i>
                     </div>
                     <div class="text-right">
-                        <div id="rev-due" class="text-4xl font-bold text-gradient">0</div>
+                        <div id="cat-medicale" class="text-4xl font-bold text-gradient">0</div>
                     </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Due for Revision</h3>
-                <p class="text-gray-600 text-sm">Questions ready for review</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Médicale</h3>
+                <p class="text-gray-600 text-sm">Modules de médecine générale</p>
             </div>
-            <div class="modern-card p-8 hover-scale">
+            <div class="modern-card p-8 hover-scale cursor-pointer" onclick="showCategoryModules('Chirurgicale')">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex-shrink-0 w-16 h-16 gradient-secondary rounded-2xl flex items-center justify-center pulse-glow">
-                        <i data-feather="alert-circle" class="h-8 w-8 text-white"></i>
+                        <i data-feather="activity" class="h-8 w-8 text-white"></i>
                     </div>
                     <div class="text-right">
-                        <div id="rev-weak" class="text-4xl font-bold text-gradient">0</div>
+                        <div id="cat-chirurgicale" class="text-4xl font-bold text-gradient">0</div>
                     </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Weak Questions</h3>
-                <p class="text-gray-600 text-sm">Areas needing improvement</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Chirurgicale</h3>
+                <p class="text-gray-600 text-sm">Modules de chirurgie</p>
             </div>
-            <div class="modern-card p-8 hover-scale">
+            <div class="modern-card p-8 hover-scale cursor-pointer" onclick="showCategoryModules('Biologie')">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex-shrink-0 w-16 h-16 gradient-success rounded-2xl flex items-center justify-center pulse-glow">
-                        <i data-feather="check-circle" class="h-8 w-8 text-white"></i>
+                        <i data-feather="cpu" class="h-8 w-8 text-white"></i>
                     </div>
                     <div class="text-right">
-                        <div id="rev-mastered" class="text-4xl font-bold text-gradient">0</div>
+                        <div id="cat-biologie" class="text-4xl font-bold text-gradient">0</div>
                     </div>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Mastered Questions</h3>
-                <p class="text-gray-600 text-sm">Successfully completed</p>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Biologie</h3>
+                <p class="text-gray-600 text-sm">Modules de sciences biologiques</p>
             </div>
         </div>
 
-        <!-- Start Revision Session -->
-        <div class="modern-card p-8 mb-12 fade-in-up">
-            <div class="md:flex md:items-center md:justify-between">
+        <!-- Category Modules Display -->
+        <div id="category-modules-section" class="modern-card p-8 mb-12 fade-in-up hidden">
+            <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-lg font-medium text-gray-900">Ready to revise?</h2>
-                    <p class="mt-1 text-sm text-gray-500">Start a revision session focused on your weak areas.</p>
+                    <h2 class="text-2xl font-bold text-gradient" id="category-title">Modules Médicaux</h2>
+                    <p class="mt-1 text-sm text-gray-500">Sélectionnez un module pour commencer la révision</p>
                 </div>
-                <div class="mt-4 flex md:mt-0 md:ml-4 items-center gap-3">
-                    <select id="module-select" class="px-3 py-2 border rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Select a module...</option>
-                    </select>
-                    <button id="continue-last" type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <i data-feather="refresh-ccw" class="mr-2 h-4 w-4"></i>
-                        Continue last
-                    </button>
-                    <button id="resume-active" type="button" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                        <i data-feather="play-circle" class="mr-2 h-4 w-4"></i>
-                        Resume active
-                    </button>
-                    <button id="start-session" type="button" class="neon-button">
-                        <i data-feather="play" class="mr-2 h-4 w-4"></i>
-                        Start Session
-                    </button>
-                    <button onclick="explainWithAI('Quelle est la cause la plus fréquente de pneumonie communautaire ?', 'Streptococcus pneumoniae')" 
-                            class="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" 
-                            aria-label="Tester l'explication IA avec une question d'exemple">
-                        <i data-feather="brain" class="mr-2 h-4 w-4"></i>
-                        Test IA
-                    </button>
-                    <button id="settings-btn" class="ml-2 px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" 
-                            aria-label="Paramètres de révision">
-                        <i data-feather="settings" class="mr-2 h-4 w-4"></i>
-                        Settings
-                    </button>
-                    <button id="help-btn" class="ml-2 px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2" 
-                            aria-label="Aide et raccourcis clavier" onclick="showHelp()">
-                        <i data-feather="help-circle" class="mr-2 h-4 w-4"></i>
-                        Help
-                    </button>
-                </div>
+                <button onclick="hideCategoryModules()" class="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors">
+                    <i data-feather="x" class="h-6 w-6"></i>
+                </button>
+            </div>
+            <div id="category-modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Modules will be loaded here -->
             </div>
         </div>
 
@@ -735,6 +618,8 @@
             let pageOffset = 0;
             const pageSize = 25;
             let answeredSet = new Set();
+            let allModules = [];
+            let modulesByCategory = { 'Médicale': [], 'Chirurgicale': [], 'Biologie': [] };
 
             let el = {};
 
@@ -763,27 +648,155 @@
             async function loadModules() {
                 try {
                     // Charger les modules disponibles pour l'utilisateur
-                    const res = await fetch(`${API_BASE}/modules/my`, { headers: headers() });
+                    const res = await fetch(`${API_BASE}/modules/by-category`, { headers: headers() });
                     if (res.status === 401) { window.location.href = 'login.html'; return; }
-                    const modules = await res.json();
-                    el.moduleSelect.innerHTML = '<option value="">Select a module...</option>';
+                    const grouped = await res.json();
                     
-                    // Trier les modules par niveau et nom pour un meilleur affichage
-                    const sortedModules = modules.sort((a, b) => {
-                        if (a.level !== b.level) {
-                            return a.level.localeCompare(b.level);
-                        }
-                        return a.name.localeCompare(b.name);
-                    });
+                    // Store modules by category
+                    modulesByCategory = grouped;
+                    allModules = [...(grouped['Médicale'] || []), ...(grouped['Chirurgicale'] || []), ...(grouped['Biologie'] || [])];
                     
-                    sortedModules.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.id;
-                        opt.textContent = `${m.name} (${m.level || ''})`;
-                        el.moduleSelect.appendChild(opt);
-                    });
+                    // Update category counts
+                    document.getElementById('cat-medicale').textContent = (grouped['Médicale'] || []).length;
+                    document.getElementById('cat-chirurgicale').textContent = (grouped['Chirurgicale'] || []).length;
+                    document.getElementById('cat-biologie').textContent = (grouped['Biologie'] || []).length;
+                    
                 } catch (e) {
                     console.error('loadModules error', e);
+                }
+            }
+            
+            function showCategoryModules(category) {
+                const section = document.getElementById('category-modules-section');
+                const title = document.getElementById('category-title');
+                const grid = document.getElementById('category-modules-grid');
+                
+                // Update title
+                const categoryTitles = {
+                    'Médicale': 'Modules Médicaux',
+                    'Chirurgicale': 'Modules Chirurgicaux',
+                    'Biologie': 'Modules de Biologie'
+                };
+                title.textContent = categoryTitles[category] || 'Modules';
+                
+                // Get modules for this category
+                const modules = modulesByCategory[category] || [];
+                
+                if (modules.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i data-feather="inbox" class="h-16 w-16 text-gray-400 mx-auto mb-4"></i>
+                            <p class="text-gray-500 text-lg">Aucun module disponible dans cette catégorie</p>
+                        </div>
+                    `;
+                } else {
+                    grid.innerHTML = modules.map(module => `
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                            <div class="p-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                        <i data-feather="book-open" class="h-6 w-6"></i>
+                                    </div>
+                                    <div class="ml-4 flex-1">
+                                        <h3 class="text-lg font-semibold text-gray-900">${module.name}</h3>
+                                        <p class="text-sm text-gray-500">${module.level || 'Tous niveaux'}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-sm text-gray-600">
+                                        <i data-feather="file-text" class="h-4 w-4 inline mr-1"></i>
+                                        ${module.qcm_count} QCM
+                                    </span>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="startModuleRevision('${module.id}', '${module.name}')" 
+                                            class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium">
+                                        <i data-feather="play" class="h-4 w-4 inline mr-1"></i>
+                                        Commencer
+                                    </button>
+                                    <button onclick="continueModuleRevision('${module.id}')" 
+                                            class="px-4 py-2 border border-indigo-600 text-indigo-600 rounded-md hover:bg-indigo-50 transition-colors">
+                                        <i data-feather="refresh-cw" class="h-4 w-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Show section and scroll to it
+                section.classList.remove('hidden');
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                feather.replace();
+            }
+            
+            function hideCategoryModules() {
+                document.getElementById('category-modules-section').classList.add('hidden');
+            }
+            
+            async function startModuleRevision(moduleId, moduleName) {
+                try {
+                    currentModuleId = moduleId;
+                    
+                    // Show loading
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+                    
+                    // Create result session
+                    const r = await fetch(`${API_BASE}/results/start`, {
+                        method: 'POST', headers: headers(),
+                        body: JSON.stringify({ moduleId, mode: 'revision' })
+                    });
+                    const data = await r.json();
+                    if (!r.ok) { 
+                        alert(data.message || 'Could not start session'); 
+                        if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                        return; 
+                    }
+                    resultId = data.resultId;
+                    correctCount = 0; 
+                    current = 0; 
+                    pageOffset = 0; 
+                    qcms = [];
+                    
+                    await loadQcms(moduleId, true);
+                    
+                    // Hide category section and show QCM trainer
+                    hideCategoryModules();
+                    document.getElementById('qcm-trainer').scrollIntoView({ behavior: 'smooth' });
+                    
+                    if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                } catch (e) {
+                    console.error('startModuleRevision error', e);
+                    const loadingIndicator = document.getElementById('loading-indicator');
+                    if (loadingIndicator) loadingIndicator.classList.add('hidden');
+                }
+            }
+            
+            async function continueModuleRevision(moduleId) {
+                // Try to resume active session for this module
+                try {
+                    const r = await fetch(`${API_BASE}/results/active`, { headers: headers() });
+                    const active = await r.json();
+                    if (active && active.module_id === moduleId) {
+                        resultId = active.id;
+                        currentModuleId = active.module_id;
+                        // Get answered questions to skip
+                        const a = await fetch(`${API_BASE}/results/${resultId}/answers`, { headers: headers() });
+                        const answered = await a.json();
+                        answeredSet = new Set(answered);
+                        correctCount = 0; current = 0; pageOffset = 0; qcms = [];
+                        await loadQcms(currentModuleId, true);
+                        hideCategoryModules();
+                        document.getElementById('qcm-trainer').scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        // No active session, start new one
+                        startModuleRevision(moduleId, '');
+                    }
+                } catch (e) {
+                    console.error('continueModuleRevision error', e);
+                    // Fallback to starting new session
+                    startModuleRevision(moduleId, '');
                 }
             }
 
@@ -1114,11 +1127,6 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
             feather.replace();
             
             // Add event listeners for new features
-            const settingsBtn = document.getElementById('settings-btn');
-            if (settingsBtn) {
-                settingsBtn.addEventListener('click', showSettingsModal);
-            }
-            
             const hintBtn = document.getElementById('qcm-hint');
             if (hintBtn) {
                 hintBtn.addEventListener('click', showHint);
@@ -1164,33 +1172,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
         }
 
         async function loadRevisionData() {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                const [resultsRes, modulesRes] = await Promise.all([
-                    fetch(`${API_BASE}/results/my`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }),
-                    fetch(`${API_BASE}/modules/my`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    })
-                ]);
-
-                if (resultsRes.ok && modulesRes.ok) {
-                    const resultsData = await resultsRes.json();
-                    const modulesData = await modulesRes.json();
-                    
-                    displayRecentActivity(resultsData);
-                    displayModules(modulesData);
-                    displayWeakestAreas(resultsData, modulesData);
-                }
-            } catch (error) {
-                console.error('Error loading revision data:', error);
-            }
+            // No longer needed - data is loaded via loadModules
         }
 
         function displayRecentActivity(results) {
@@ -1861,15 +1843,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
             }
         }
 
-        // Settings Modal Functions
-        function showSettingsModal() {
-            loadSettings();
-            document.getElementById('settingsModal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.add('hidden');
-        }
+        // Settings Modal Functions (removed - not needed in new design)
 
         function loadSettings() {
             const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
@@ -2000,17 +1974,11 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                         e.preventDefault();
                         showHint();
                         break;
-                    case 's':
-                        if (e.ctrlKey) {
-                            e.preventDefault();
-                            showSettingsModal();
-                        }
-                        break;
                     case 'Escape':
                         e.preventDefault();
                         // Close any open modals
-                        closeSettingsModal();
                         closeUserProfileModal();
+                        hideCategoryModules();
                         break;
                 }
             });
@@ -2115,41 +2083,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
 
         // Help function
         function showHelp() {
-            const helpContent = `
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-900">🚀 Raccourcis Clavier</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div class="space-y-2">
-                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">1-4</kbd> Sélectionner une réponse</div>
-                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Entrée</kbd> Valider/Question suivante</div>
-                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">H</kbd> Afficher un indice</div>
-                        </div>
-                        <div class="space-y-2">
-                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Ctrl+S</kbd> Ouvrir les paramètres</div>
-                            <div><kbd class="px-2 py-1 bg-gray-100 rounded">Échap</kbd> Fermer les modals</div>
-                        </div>
-                    </div>
-                    
-                    <h3 class="text-lg font-semibold text-gray-900">⚙️ Fonctionnalités</h3>
-                    <ul class="text-sm space-y-1 text-gray-600">
-                        <li>• <strong>Paramètres :</strong> Personnalisez votre expérience (difficulté, minuteur, effets sonores)</li>
-                        <li>• <strong>Explication IA :</strong> Obtenez des explications détaillées via ChatGPT</li>
-                        <li>• <strong>Indices :</strong> Bouton d'aide disponible pour certaines questions</li>
-                        <li>• <strong>Auto-avance :</strong> Passage automatique à la question suivante</li>
-                        <li>• <strong>Effets sonores :</strong> Feedback audio pour les réponses</li>
-                    </ul>
-                    
-                    <h3 class="text-lg font-semibold text-gray-900">💡 Conseils</h3>
-                    <ul class="text-sm space-y-1 text-gray-600">
-                        <li>• Utilisez les raccourcis clavier pour une navigation plus rapide</li>
-                        <li>• Activez les effets sonores pour un meilleur feedback</li>
-                        <li>• Consultez les explications IA pour approfondir vos connaissances</li>
-                        <li>• Ajustez la difficulté selon votre niveau</li>
-                    </ul>
-                </div>
-            `;
-            
-            showNotification(helpContent, 'info', 10000);
+            alert(`🚀 Raccourcis Clavier:\n\n1-4: Sélectionner une réponse\nEntrée: Valider/Question suivante\nH: Afficher un indice\nÉchap: Fermer les modals\n\n💡 Conseils:\n• Cliquez sur une catégorie pour voir les modules\n• Utilisez "Commencer" pour démarrer une nouvelle session\n• Utilisez l'icône de rafraîchissement pour continuer une session existante\n• Consultez les explications IA après chaque réponse`);
         }
 
         // Close dropdowns when clicking outside
@@ -2170,57 +2104,6 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
 
 
         </script>
-
-        <!-- Activité Récente -->
-        <div class="mb-8">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Activité Récente</h2>
-            <div class="bg-white shadow rounded-lg overflow-hidden">
-                <div id="recentActivityContainer" class="divide-y divide-gray-200">
-                    <!-- Activities will be loaded dynamically -->
-                </div>
-                <div class="px-6 py-4 bg-gray-50 text-center">
-                    <button type="button" class="neon-button" onclick="showAllActivity()">
-                        <i data-feather="activity" class="mr-2 h-4 w-4"></i>
-                        Voir toute l'activité
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Weakest Areas -->
-        <div class="mb-8">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Your Weakest Areas</h2>
-            <div id="weakestAreasContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Weakest areas will be loaded dynamically -->
-            </div>
-        </div>
-
-        <!-- Modules Disponibles -->
-        <div class="mb-8">
-            <h2 class="text-lg font-medium text-gray-900 mb-4">Modules Disponibles</h2>
-            <div id="modulesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Modules will be loaded dynamically -->
-            </div>
-        </div>
-        
-        <!-- Activity Modal -->
-        <div id="activityModal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="p-6 border-b border-gray-200">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-2xl font-bold text-gradient">Toute votre activité</h2>
-                        <button onclick="closeActivityModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                            <i data-feather="x" class="h-6 w-6 text-gray-500"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="p-6 overflow-y-auto" style="max-height: 60vh;">
-                    <div id="allActivityContainer">
-                        <!-- All activities will be loaded here -->
-                    </div>
-                </div>
-            </div>
-        </div>
     </main>
 
 
