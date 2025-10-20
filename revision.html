@@ -822,6 +822,9 @@
                 el.progress.textContent = `${Math.min(current + 1, qcms.length)} / ${qcms.length}`;
             }
 
+            // Variable pour stocker les indices sélectionnés (sélection multiple)
+            let selectedIndices = new Set();
+
             function renderQcm() {
                 if (!qcms.length) return;
                 // Move current to first unanswered. If none in current batch, try to load more.
@@ -837,6 +840,7 @@
 
                 const q = qcms[current];
                 selectedIndex = null;
+                selectedIndices.clear(); // Reset sélection multiple
                 el.submit.disabled = true;
                 el.next.classList.add('hidden');
                 el.feedback.className = 'hidden mt-4 p-3 rounded-md';
@@ -855,17 +859,39 @@
                     }
                 }
                 
-                q.choices.forEach((choice, i) => {
+                // Afficher 5 options (ajouter des options vides si nécessaire)
+                const displayChoices = [...q.choices];
+                while (displayChoices.length < 5) {
+                    displayChoices.push(''); // Option vide si moins de 5
+                }
+                
+                displayChoices.slice(0, 5).forEach((choice, i) => {
+                    if (!choice) return; // Ne pas afficher les options vides
+                    
                     const btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'w-full text-left px-4 py-3 border rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors';
-                    btn.textContent = `${i + 1}. ${choice}`;
-                    btn.setAttribute('aria-label', `Option ${i + 1}: ${choice}`);
+                    btn.textContent = `${String.fromCharCode(65 + i)}. ${choice}`; // A, B, C, D, E
+                    btn.setAttribute('aria-label', `Option ${String.fromCharCode(65 + i)}: ${choice}`);
+                    btn.setAttribute('data-index', i);
+                    
                     btn.addEventListener('click', () => {
-                        selectedIndex = i;
-                        Array.from(el.choices.children).forEach(c => c.classList.remove('ring-2','ring-indigo-500','bg-indigo-50'));
-                        btn.classList.add('ring-2','ring-indigo-500','bg-indigo-50');
-                        el.submit.disabled = false;
+                        // Sélection multiple
+                        if (selectedIndices.has(i)) {
+                            selectedIndices.delete(i);
+                            btn.classList.remove('ring-2','ring-indigo-500','bg-indigo-50');
+                        } else {
+                            selectedIndices.add(i);
+                            btn.classList.add('ring-2','ring-indigo-500','bg-indigo-50');
+                        }
+                        
+                        // Activer le bouton submit si au moins une option sélectionnée
+                        el.submit.disabled = selectedIndices.size === 0;
+                        
+                        // Garder selectedIndex pour compatibilité (première sélection)
+                        if (selectedIndices.size > 0) {
+                            selectedIndex = Array.from(selectedIndices)[0];
+                        }
                         
                         // Play sound effect if enabled
                         const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
@@ -947,18 +973,22 @@
             }
 
             // Function to explain with AI - accessible globalement
-            window.explainWithAI = function(question, correctAnswer) {
+            window.explainWithAI = function(question, options, correctAnswer) {
                 try {
                     const decodedQuestion = decodeURIComponent(question);
+                    const decodedOptions = decodeURIComponent(options);
                     const decodedAnswer = decodeURIComponent(correctAnswer);
                     
                     const prompt = `Peux-tu m'expliquer cette question de médecine en détail ?
 
 Question: ${decodedQuestion}
 
+Options:
+${decodedOptions}
+
 Réponse correcte: ${decodedAnswer}
 
-Je voudrais une explication approfondie sur pourquoi cette réponse est correcte et les concepts médicaux impliqués. Merci !`;
+Je voudrais une explication approfondie sur pourquoi cette réponse est correcte, pourquoi les autres options sont incorrectes, et les concepts médicaux impliqués. Merci !`;
                     
                     // URL ChatGPT corrigée
                     const chatGPTUrl = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
@@ -1018,7 +1048,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
             
             if (el.submit) {
                 el.submit.addEventListener('click', async () => {
-                    if (selectedIndex === null) return;
+                    if (selectedIndex === null || selectedIndices.size === 0) return;
                     const q = qcms[current];
                     try {
                         const a = await fetch(`${API_BASE}/results/answer`, {
@@ -1027,6 +1057,30 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                         });
                         const resp = await a.json();
                         const isCorrect = !!resp.isCorrect;
+                        const correctIndex = resp.correctIndex !== undefined ? resp.correctIndex : q.answer_index;
+                        
+                        // Colorer les options
+                        const choiceButtons = Array.from(el.choices.children);
+                        choiceButtons.forEach((btn, idx) => {
+                            const btnIndex = parseInt(btn.getAttribute('data-index'));
+                            
+                            // Réinitialiser les styles
+                            btn.classList.remove('ring-2','ring-indigo-500','bg-indigo-50');
+                            
+                            // Bonne réponse = vert
+                            if (btnIndex === correctIndex) {
+                                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-900');
+                                btn.classList.remove('hover:bg-gray-50');
+                            }
+                            // Mauvaise réponse sélectionnée = rouge
+                            else if (selectedIndices.has(btnIndex)) {
+                                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-900');
+                                btn.classList.remove('hover:bg-gray-50');
+                            }
+                            // Désactiver tous les boutons après soumission
+                            btn.disabled = true;
+                            btn.classList.add('cursor-not-allowed');
+                        });
                         
                         // Play sound effects if enabled
                         const settings = JSON.parse(localStorage.getItem('revisionSettings') || '{}');
@@ -1041,16 +1095,20 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                         // Update session stats
                         updateSessionStats();
                         
+                        // Créer le message pour l'IA avec toutes les options
+                        const optionsText = q.choices.map((c, i) => `${String.fromCharCode(65 + i)}. ${c}`).join('\n');
+                        const correctAnswer = q.choices[correctIndex] || 'Réponse correcte';
+                        
                         if (isCorrect) {
                             correctCount += 1;
                             el.feedback.className = 'mt-4 p-3 rounded-md bg-green-50 text-green-800';
                             el.feedback.innerHTML = `
                                 <div class="flex items-center justify-between">
                                     <span>✅ Correct! Excellente réponse!</span>
-                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(q.choices[selectedIndex] || 'Réponse correcte')}')" 
+                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(optionsText)}', '${encodeURIComponent(correctAnswer)}')" 
                                             class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                                         </svg>
                                         Explication IA
                                     </button>
@@ -1062,7 +1120,7 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
                             el.feedback.innerHTML = `
                                 <div class="flex items-center justify-between">
                                     <span>❌ Incorrect.${ct}</span>
-                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(resp.correctText || 'Réponse correcte non spécifiée')}')" 
+                                    <button onclick="explainWithAI('${encodeURIComponent(q.question)}', '${encodeURIComponent(optionsText)}', '${encodeURIComponent(correctAnswer)}')" 
                                             class="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center">
                                         <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
@@ -1086,6 +1144,14 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
             
             if (el.next) {
                 el.next.addEventListener('click', () => {
+                    // Réactiver les boutons pour la prochaine question
+                    const choiceButtons = Array.from(el.choices.children);
+                    choiceButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('cursor-not-allowed', 'bg-green-100', 'border-green-500', 'text-green-900', 'bg-red-100', 'border-red-500', 'text-red-900');
+                        btn.classList.add('hover:bg-gray-50');
+                    });
+                    
                     current += 1;
                     if (current >= qcms.length) {
                         finishSession();
