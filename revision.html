@@ -988,15 +988,60 @@ Réponse correcte: ${correctAnswer}
 
 Je voudrais une explication approfondie sur pourquoi cette réponse est correcte, pourquoi les autres options sont incorrectes, et les concepts médicaux impliqués. Merci !`;
                     
-                    console.log('Opening ChatGPT with prompt:', prompt);
+                    console.log('Prompt à copier:', prompt);
                     
-                    // URL ChatGPT corrigée
-                    const chatGPTUrl = `https://chatgpt.com/?q=${encodeURIComponent(prompt)}`;
-                    const newWindow = window.open(chatGPTUrl, '_blank');
+                    // Copier le prompt dans le presse-papiers
+                    navigator.clipboard.writeText(prompt).then(() => {
+                        // Afficher un message de confirmation
+                        const notification = document.createElement('div');
+                        notification.style.cssText = `
+                            position: fixed;
+                            top: 20px;
+                            right: 20px;
+                            background: #10b981;
+                            color: white;
+                            padding: 16px 24px;
+                            border-radius: 8px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            z-index: 10000;
+                            font-weight: 500;
+                            animation: slideIn 0.3s ease-out;
+                        `;
+                        notification.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <svg style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                    <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <div style="font-weight: 600;">Prompt copié !</div>
+                                    <div style="font-size: 14px; opacity: 0.9;">Collez-le dans ChatGPT (Ctrl+V)</div>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(notification);
+                        
+                        // Supprimer la notification après 4 secondes
+                        setTimeout(() => {
+                            notification.style.animation = 'slideOut 0.3s ease-in';
+                            setTimeout(() => notification.remove(), 300);
+                        }, 4000);
+                        
+                        // Ouvrir ChatGPT
+                        setTimeout(() => {
+                            const newWindow = window.open('https://chatgpt.com/', '_blank');
+                            if (!newWindow) {
+                                alert('Veuillez autoriser les pop-ups pour utiliser cette fonctionnalité');
+                            }
+                        }, 500);
+                        
+                    }).catch(err => {
+                        console.error('Erreur copie presse-papiers:', err);
+                        // Fallback : afficher le prompt dans une alerte
+                        alert('Copiez ce prompt et collez-le dans ChatGPT :\n\n' + prompt);
+                        window.open('https://chatgpt.com/', '_blank');
+                    });
                     
-                    if (!newWindow) {
-                        alert('Veuillez autoriser les pop-ups pour utiliser cette fonctionnalité');
-                    }
                 } catch (error) {
                     console.error('Erreur explainWithAI:', error);
                     // Fallback : ouvrir ChatGPT sans prompt
@@ -1006,6 +1051,32 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
             
             // Rendre accessible globalement
             window.explainWithAI = explainWithAI;
+            
+            // Ajouter les animations CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
 
         // Fonction de test pour créer un token temporaire (à supprimer en production)
         function createTestToken() {
