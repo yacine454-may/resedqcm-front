@@ -656,6 +656,9 @@
                     modulesByCategory = grouped;
                     allModules = [...(grouped['Médicale'] || []), ...(grouped['Chirurgicale'] || []), ...(grouped['Biologie'] || [])];
                     
+                    // Load progress for each module
+                    await loadModulesProgress();
+                    
                     // Update category counts
                     document.getElementById('cat-medicale').textContent = (grouped['Médicale'] || []).length;
                     document.getElementById('cat-chirurgicale').textContent = (grouped['Chirurgicale'] || []).length;
@@ -663,6 +666,32 @@
                     
                 } catch (e) {
                     console.error('loadModules error', e);
+                }
+            }
+            
+            async function loadModulesProgress() {
+                try {
+                    // Charger les statistiques de progression pour tous les modules
+                    const res = await fetch(`${API_BASE}/user/progress`, { headers: headers() });
+                    if (res.ok) {
+                        const progressData = await res.json();
+                        
+                        // Associer les stats aux modules
+                        for (const category in modulesByCategory) {
+                            modulesByCategory[category] = modulesByCategory[category].map(module => {
+                                const stats = progressData.find(p => p.module_id === module.id) || {
+                                    total_qcm: module.qcm_count || 0,
+                                    correct_answers: 0,
+                                    incorrect_answers: 0,
+                                    unanswered: module.qcm_count || 0
+                                };
+                                return { ...module, stats };
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('loadModulesProgress error', e);
+                    // Continue without progress data
                 }
             }
             
@@ -690,7 +719,21 @@
                         </div>
                     `;
                 } else {
-                    grid.innerHTML = modules.map(module => `
+                    grid.innerHTML = modules.map(module => {
+                        // Calculer les pourcentages
+                        const stats = module.stats || {
+                            total_qcm: module.qcm_count || 0,
+                            correct_answers: 0,
+                            incorrect_answers: 0,
+                            unanswered: module.qcm_count || 0
+                        };
+                        
+                        const total = stats.total_qcm || module.qcm_count || 1;
+                        const correctPercent = Math.round((stats.correct_answers / total) * 100) || 0;
+                        const incorrectPercent = Math.round((stats.incorrect_answers / total) * 100) || 0;
+                        const unansweredPercent = 100 - correctPercent - incorrectPercent;
+                        
+                        return `
                         <div class="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                             <div class="p-6">
                                 <div class="flex items-center mb-4">
@@ -702,12 +745,57 @@
                                         <p class="text-sm text-gray-500">${module.level || 'Tous niveaux'}</p>
                                     </div>
                                 </div>
-                                <div class="flex items-center justify-between mb-4">
-                                    <span class="text-sm text-gray-600">
-                                        <i data-feather="file-text" class="h-4 w-4 inline mr-1"></i>
-                                        ${module.qcm_count} QCM
-                                    </span>
+                                
+                                <!-- Barre de progression -->
+                                <div class="mb-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-gray-600">
+                                            <i data-feather="file-text" class="h-4 w-4 inline mr-1"></i>
+                                            ${total} QCM
+                                        </span>
+                                        <span class="text-sm font-medium text-gray-700">
+                                            ${correctPercent + incorrectPercent}% complété
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Barre de progression colorée -->
+                                    <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden flex">
+                                        ${correctPercent > 0 ? `
+                                            <div class="bg-green-500 h-full transition-all duration-500" 
+                                                 style="width: ${correctPercent}%"
+                                                 title="Correct: ${correctPercent}%"></div>
+                                        ` : ''}
+                                        ${incorrectPercent > 0 ? `
+                                            <div class="bg-red-500 h-full transition-all duration-500" 
+                                                 style="width: ${incorrectPercent}%"
+                                                 title="Incorrect: ${incorrectPercent}%"></div>
+                                        ` : ''}
+                                        ${unansweredPercent > 0 ? `
+                                            <div class="bg-gray-300 h-full transition-all duration-500" 
+                                                 style="width: ${unansweredPercent}%"
+                                                 title="Non répondu: ${unansweredPercent}%"></div>
+                                        ` : ''}
+                                    </div>
+                                    
+                                    <!-- Légende -->
+                                    <div class="flex items-center justify-between mt-2 text-xs">
+                                        <div class="flex items-center gap-3">
+                                            <span class="flex items-center">
+                                                <span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                                                ${stats.correct_answers} correct${stats.correct_answers > 1 ? 's' : ''}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <span class="w-3 h-3 bg-red-500 rounded-full mr-1"></span>
+                                                ${stats.incorrect_answers} incorrect${stats.incorrect_answers > 1 ? 's' : ''}
+                                            </span>
+                                            <span class="flex items-center">
+                                                <span class="w-3 h-3 bg-gray-300 rounded-full mr-1"></span>
+                                                ${stats.unanswered} restant${stats.unanswered > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                                
                                 <div class="flex gap-2">
                                     <button onclick="startModuleRevision('${module.id}', '${module.name}')" 
                                             class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors font-medium">
@@ -721,7 +809,8 @@
                                 </div>
                             </div>
                         </div>
-                    `).join('');
+                    `;
+                    }).join('');
                 }
                 
                 // Show section and scroll to it
