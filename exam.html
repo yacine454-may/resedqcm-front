@@ -440,6 +440,13 @@
             <i data-feather="play" class="mr-2 h-4 w-4"></i>
             Start Exam
           </button>
+          <div class="w-full flex items-center gap-3">
+            <input id="local-json-input" type="file" accept="application/json" class="hidden" />
+            <button id="import-json" type="button" class="inline-flex items-center px-4 py-2 border-2 border-indigo-500 rounded-xl text-indigo-600 hover:bg-indigo-50 transition-all w-full">
+              <i data-feather="upload" class="mr-2 h-4 w-4"></i>
+              Importer JSON local
+            </button>
+          </div>
           <div class="timer-display">
             <i data-feather="clock" class="inline mr-2 h-5 w-5"></i>
             <span id="timer">00:00</span>
@@ -673,7 +680,55 @@
       next: document.getElementById('exam-next'),
       submit: document.getElementById('submit-exam'),
       summary: document.getElementById('exam-summary'),
+      importBtn: document.getElementById('import-json'),
+      fileInput: document.getElementById('local-json-input'),
     };
+
+    // Local JSON support
+    const localModules = new Map(); // key: local:ModuleName -> array of {id, question, choices, correctIndex, year, chapitre}
+
+    function normalizeLocalJson(data) {
+      const years = ['4eme_annee','5eme_annee','6eme_annee'];
+      const result = new Map();
+      const toChoices = (opts) => {
+        if (!opts || typeof opts !== 'object') return [];
+        const letters = ['A','B','C','D','E'];
+        return letters.filter(l => Object.prototype.hasOwnProperty.call(opts, l)).map(l => String(opts[l]));
+      };
+      years.forEach(y => {
+        const arr = Array.isArray(data?.[y]) ? data[y] : [];
+        arr.forEach((item, i) => {
+          const moduleName = String(item.module || 'Module');
+          const key = `local:${moduleName}`;
+          if (!result.has(key)) result.set(key, []);
+          const choices = toChoices(item.options);
+          const correctLetter = (item.reponse_juste || '').toString().trim().toUpperCase();
+          const letterIndex = {A:0,B:1,C:2,D:3,E:4}[correctLetter];
+          result.get(key).push({
+            id: `${key}:${i+1}`,
+            question: String(item.question || '').trim(),
+            choices,
+            correctIndex: Number.isInteger(letterIndex) ? letterIndex : null,
+            chapitre: item.chapitre || null,
+            year: y
+          });
+        });
+      });
+      return result;
+    }
+
+    function populateModulesFromLocal() {
+      localModules.forEach((arr, key) => {
+        const exists = Array.from(el.module.options).some(o => o.value === key);
+        if (!exists) {
+          const name = key.replace(/^local:/,'');
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = `${name} (Local)`;
+          el.module.appendChild(opt);
+        }
+      });
+    }
 
     function headers() {
       const token = localStorage.getItem('token');
@@ -750,12 +805,14 @@
             btn.style.transform = '';
           }, 150);
           
-          try {
-            await fetch(`${API_BASE}/results/answer`, {
-              method: 'POST', headers: headers(),
-              body: JSON.stringify({ resultId, qcmId: q.id, selectedIndex: i })
-            });
-          } catch(e){}
+          if (resultId) {
+            try {
+              await fetch(`${API_BASE}/results/answer`, {
+                method: 'POST', headers: headers(),
+                body: JSON.stringify({ resultId, qcmId: q.id, selectedIndex: i })
+              });
+            } catch(e){}
+          }
         });
         el.choices.appendChild(btn);
       });
@@ -787,19 +844,26 @@
       const mins = parseInt(el.duration.value,10) || 60;
       currentModuleId = moduleId;
 
-      // Start result in exam mode
-      const r = await fetch(`${API_BASE}/results/start`, {
-        method: 'POST', headers: headers(),
-        body: JSON.stringify({ moduleId, mode: 'exam' })
-      });
-      const data = await r.json();
-      if (!r.ok) { alert(data.message || 'Could not start exam'); return; }
-      resultId = data.resultId;
+      if (moduleId.startsWith('local:')) {
+        const pool = localModules.get(moduleId) || [];
+        if (!pool.length) { alert('Aucune question pour ce module local'); return; }
+        questions = pool.slice(0, count).map(q => ({ id: q.id, question: q.question, choices: q.choices }));
+        resultId = null;
+      } else {
+        // Start result in exam mode (backend)
+        const r = await fetch(`${API_BASE}/results/start`, {
+          method: 'POST', headers: headers(),
+          body: JSON.stringify({ moduleId, mode: 'exam' })
+        });
+        const data = await r.json();
+        if (!r.ok) { alert(data.message || 'Could not start exam'); return; }
+        resultId = data.resultId;
 
-      // Load fixed set of questions
-      const qRes = await fetch(`${API_BASE}/qcm/sb?moduleId=${encodeURIComponent(moduleId)}&limit=${count}&offset=0`, { headers: headers() });
-      questions = await qRes.json();
-      if (!Array.isArray(questions) || questions.length === 0) { alert('No questions available for this module.'); return; }
+        // Load fixed set of questions
+        const qRes = await fetch(`${API_BASE}/qcm/sb?moduleId=${encodeURIComponent(moduleId)}&limit=${count}&offset=0`, { headers: headers() });
+        questions = await qRes.json();
+        if (!Array.isArray(questions) || questions.length === 0) { alert('No questions available for this module.'); return; }
+      }
 
       // Show card and render
       el.card.classList.remove('hidden');
@@ -812,6 +876,33 @@
     async function finishExam() {
       // finalize result
       try {
+        if (!resultId) {
+          // Local mode scoring
+          const total = questions.length;
+          let score = 0;
+          // build a quick index for local lookup
+          const localIndex = new Map();
+          localModules.forEach(arr => arr.forEach(q => localIndex.set(q.id, q)));
+          questions.forEach(q => {
+            const sel = answers.get(q.id);
+            const ref = localIndex.get(q.id);
+            if (Number.isInteger(sel) && ref && Number.isInteger(ref.correctIndex) && sel === ref.correctIndex) score++;
+          });
+          const pct = total > 0 ? Math.round((score*100)/total) : 0;
+          el.summary.innerHTML = `
+          <div class="text-center mb-8">
+            <div class="w-24 h-24 mx-auto mb-4 rounded-full gradient-bg flex items-center justify-center pulse-glow">
+              <i data-feather="award" class="h-12 w-12 text-white"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-gradient mb-2">Exam Completed! (Local)</h2>
+            <p class="text-xl text-blue-600 font-semibold">${pct}%</p>
+          </div>`;
+          el.card.classList.add('hidden');
+          el.summary.classList.remove('hidden');
+          if (timerInterval) clearInterval(timerInterval);
+          feather.replace();
+          return;
+        }
         const f = await fetch(`${API_BASE}/results/finish`, {
           method: 'POST', headers: headers(),
           body: JSON.stringify({ resultId })
@@ -1312,11 +1403,49 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
       renderNavProfile();
       await loadModules();
       await loadExamHistory();
+      // Auto-charger les QCM locaux packagés
+      try {
+        const resp = await fetch('static/qcm_medecine_constantine.json', { cache: 'no-store' });
+        if (resp.ok) {
+          const data = await resp.json();
+          const normalized = normalizeLocalJson(data);
+          normalized.forEach((arr, key) => { localModules.set(key, arr); });
+          populateModulesFromLocal();
+          console.log('QCM locaux (Constantine) chargés');
+        }
+      } catch (e) {
+        console.warn('QCM locaux non trouvés ou non chargés:', e);
+      }
       
       el.start.addEventListener('click', startExam);
       el.next.addEventListener('click', () => { if (idx < questions.length-1) { idx++; renderQuestion(); }});
       el.prev.addEventListener('click', () => { if (idx > 0) { idx--; renderQuestion(); }});
       el.submit.addEventListener('click', finishExam);
+
+      // Local JSON import
+      if (el.importBtn && el.fileInput) {
+        el.importBtn.addEventListener('click', () => el.fileInput.click());
+        el.fileInput.addEventListener('change', async (e) => {
+          try {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const text = await file.text();
+            const data = JSON.parse(text);
+            const normalized = normalizeLocalJson(data);
+            // Merge into localModules
+            normalized.forEach((arr, key) => {
+              localModules.set(key, arr);
+            });
+            populateModulesFromLocal();
+            alert('QCM locaux importés avec succès. Sélectionnez un module (Local) puis Start Exam.');
+          } catch (err) {
+            console.error('Import JSON error:', err);
+            alert('Fichier JSON invalide.');
+          } finally {
+            e.target.value = '';
+          }
+        });
+      }
 
       // Mobile menu toggle (aligné au dashboard)
       const mobileBtn = document.querySelector('nav .sm\\:hidden button');

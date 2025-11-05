@@ -134,9 +134,9 @@
 
   <script>
     // API Base URL - works for both local development and production
-    const API_BASE = (window.location.hostname === 'localhost')
-      ? 'http://localhost:8001/api'
-      : '/api';
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.protocol === 'file:')
+      ? 'http://localhost:8001/api' 
+      : 'https://qcmbackend-i16b.onrender.com/api';
     
     console.log('🔗 API_BASE:', API_BASE);
     const alertBox = document.getElementById('alert');
