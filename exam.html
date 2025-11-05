@@ -1416,6 +1416,19 @@ Je voudrais une explication approfondie sur pourquoi cette réponse est correcte
       } catch (e) {
         console.warn('QCM locaux non trouvés ou non chargés:', e);
       }
+      // Charger aussi le pack Algérie (4e/5e/6e)
+      try {
+        const resp2 = await fetch('static/qcm_algerie_all.json', { cache: 'no-store' });
+        if (resp2.ok) {
+          const data2 = await resp2.json();
+          const normalized2 = normalizeLocalJson(data2);
+          normalized2.forEach((arr, key) => { localModules.set(key, arr); });
+          populateModulesFromLocal();
+          console.log('QCM Algérie (4e/5e/6e) chargés');
+        }
+      } catch (e) {
+        console.warn('QCM Algérie non trouvés ou non chargés:', e);
+      }
       
       el.start.addEventListener('click', startExam);
       el.next.addEventListener('click', () => { if (idx < questions.length-1) { idx++; renderQuestion(); }});
